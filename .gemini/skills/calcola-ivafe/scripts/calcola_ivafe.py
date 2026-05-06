@@ -123,19 +123,17 @@ def _try_previous_days(target_date: date, fetch_fn, source_name: str,
 # TASSO DI CAMBIO — Banca d'Italia REST API
 # ===================================================================
 
-def _fetch_exchange_rate_raw(target_date: date) -> float | None:
+def _fetch_exchange_rate_monthly(target_date: date) -> float | None:
     """
-    Chiama l'API REST della Banca d'Italia per ottenere il tasso EUR/USD.
+    Chiama l'API REST della Banca d'Italia per ottenere il tasso medio mensile EUR/USD.
     """
-    url = (
-        "https://tassidicambio.bancaditalia.it/terzevalute-wf-web/rest/v1.0"
-        "/dailyRates"
-    )
+    url = "https://tassidicambio.bancaditalia.it/terzevalute-wf-web/rest/v1.0/monthlyAverageRates"
     params = {
-        "referenceDate": target_date.strftime("%Y-%m-%d"),
+        "month": str(target_date.month).zfill(2),
+        "year": str(target_date.year),
         "baseCurrencyIsoCode": "USD",
         "currencyIsoCode": "EUR",
-        "lang": "en",
+        "lang": "it",
     }
     headers = {"Accept": "application/json"}
 
@@ -155,20 +153,22 @@ def _fetch_exchange_rate_raw(target_date: date) -> float | None:
 
 def get_exchange_rate(target_date: date) -> float:
     """
-    Restituisce il tasso EUR/USD (quanti USD per 1 EUR) dalla Banca d'Italia.
+    Restituisce il tasso EUR/USD (media mensile) dalla Banca d'Italia.
     Utilizza la cache in memoria per evitare chiamate ridondanti.
     """
-    cache_key = target_date.isoformat()
+    cache_key = f"{target_date.year}_{target_date.month}"
     if cache_key in _exchange_rate_cache:
         return _exchange_rate_cache[cache_key]
 
-    rate = _try_previous_days(
-        target_date, _fetch_exchange_rate_raw, "tasso di cambio"
-    )
-    
+    rate = _fetch_exchange_rate_monthly(target_date)
+    if rate is None:
+        raise ValueError(
+            f"Impossibile recuperare il tasso di cambio mensile per {target_date.year}-{target_date.month}"
+        )
+
     logger.info(
-        "Tasso EUR/USD al %s: %.4f (1 USD = %.4f EUR)",
-        target_date.isoformat(), rate, 1/rate,
+        "Tasso EUR/USD (media mensile) per %d-%02d: %.4f (1 USD = %.4f EUR)",
+        target_date.year, target_date.month, rate, 1/rate,
     )
     _exchange_rate_cache[cache_key] = rate
     return rate
@@ -225,13 +225,28 @@ def get_stock_price(target_date: date, ticker: str = "GOOG") -> float:
 
 def load_csv(csv_path: str) -> pd.DataFrame:
     """
-    Carica il CSV dell'estratto conto GSU.
-    - Salta la prima riga (titolo del report)
+    Carica il CSV o TSV dell'estratto conto GSU.
+    - Rileva automaticamente il separatore
+    - Gestisce la presenza o meno di una riga di titolo iniziale
     - Identifica le colonne per NOME (non per posizione)
     - Pulisce i dati numerici e le date
     """
-    # La riga 0 è il titolo del report, la riga 1 contiene gli header
-    df = pd.read_csv(csv_path, skiprows=1, dtype=str)
+    # Tenta di leggere senza saltare righe
+    try:
+        df = pd.read_csv(csv_path, sep=None, engine='python', dtype=str)
+    except Exception as e:
+        logger.error("Errore nella lettura del file: %s", e)
+        raise e
+
+    # Controlla se le colonne richieste sono presenti
+    # Altrimenti tenta di saltare la prima riga (caso report con titolo)
+    required_found = all(any(col.strip().lower() == name.lower() for col in df.columns) 
+                         for name in REQUIRED_COLUMNS.values())
+    
+    if not required_found:
+        logger.info("Colonne richieste non trovate. Tento saltando la prima riga...")
+        df = pd.read_csv(csv_path, sep=None, engine='python', dtype=str, skiprows=1)
+        
     available_cols = list(df.columns)
     col_map = {}
 
@@ -300,7 +315,7 @@ def load_csv(csv_path: str) -> pd.DataFrame:
     df = df[df["shares_deposited"] > 0]
 
     logger.info("Caricate %d righe valide dal CSV", len(df))
-    return df[["vesting_date", "shares_deposited", "sale_date"]].reset_index(drop=True)
+    return df[["vesting_date", "shares_deposited", "sale_date", "Purno"]].reset_index(drop=True)
 
 
 # ===================================================================
@@ -315,6 +330,33 @@ def compute_ivafe(df: pd.DataFrame, anno_fiscale: int, ticker: str = "GOOG",
     anno_start = date(anno_fiscale, 1, 1)
     anno_end = date(anno_fiscale, 12, 31)
     total_days = days_in_year(anno_fiscale)
+
+    # --- Pre-caricamento prezzi azioni ---
+    preload_start = anno_start - timedelta(days=15)
+    preload_end = anno_end + timedelta(days=2)
+    
+    logger.info("Pre-caricamento prezzi delle azioni per %s dal %s al %s", ticker, preload_start.isoformat(), preload_end.isoformat())
+    try:
+        stock_data = yf.download(ticker, start=preload_start.isoformat(), end=preload_end.isoformat())
+        if not stock_data.empty:
+            # Reindicizza su tutti i giorni di calendario e propaga i valori (ffill)
+            all_dates = pd.date_range(start=preload_start, end=preload_end - timedelta(days=1))
+            stock_data = stock_data.reindex(all_dates, method='ffill')
+            # Popola la cache
+            for d, row in stock_data.iterrows():
+                try:
+                    close_val = row['Close']
+                    if isinstance(close_val, pd.Series):
+                        price = float(close_val.iloc[0])
+                    else:
+                        price = float(close_val)
+                        
+                    if not pd.isna(price):
+                        _stock_price_cache[f"{ticker}_{d.date().isoformat()}"] = price
+                except Exception as e:
+                    logger.debug("Impossibile analizzare il prezzo per %s: %s", d, e)
+    except Exception as e:
+        logger.warning("Pre-caricamento dei prezzi fallito: %s. Si procede in modalità lenta.", e)
 
     # 1. Ignora azioni maturate DOPO la fine dell'anno fiscale
     df = df[df["vesting_date"] <= anno_end].copy()
@@ -382,7 +424,11 @@ def compute_ivafe(df: pd.DataFrame, anno_fiscale: int, ticker: str = "GOOG",
         fx_start = get_exchange_rate(data_inizio)
         fx_end = get_exchange_rate(data_finale)
 
-        vi = shares * price_start / fx_start
+        if not row["is_pre_anno"]:
+            vi = 0.0
+        else:
+            vi = shares * price_start / fx_start
+            
         vf = shares * price_end / fx_end
         giorni_ivafe = calculate_days(data_inizio, data_finale)
         if giorni_ivafe <= 0:
