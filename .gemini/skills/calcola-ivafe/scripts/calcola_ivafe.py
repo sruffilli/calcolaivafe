@@ -417,10 +417,14 @@ def compute_ivafe(df: pd.DataFrame, anno_fiscale: int, ticker: str = "GOOG",
         if data_finale < data_inizio:
             continue
             
-        price_start = get_stock_price(data_inizio, ticker)
-        price_end = get_stock_price(data_finale, ticker)
-        fx_start = get_exchange_rate(data_inizio)
-        fx_end = get_exchange_rate(data_finale)
+        try:
+            price_start = get_stock_price(data_inizio, ticker)
+            price_end = get_stock_price(data_finale, ticker)
+            fx_start = get_exchange_rate(data_inizio)
+            fx_end = get_exchange_rate(data_finale)
+        except ValueError as e:
+            logger.warning("Salto la riga per %s a causa di un errore nel recupero dati: %s", row.get("Purno", "N/A"), e)
+            continue
 
         if not row["is_pre_anno"]:
             vi = 0.0
@@ -441,6 +445,8 @@ def compute_ivafe(df: pd.DataFrame, anno_fiscale: int, ticker: str = "GOOG",
             "ivafe": ivafe
         })
 
+    if not rows_ivafe:
+        return pd.DataFrame()
     rdf = pd.DataFrame(rows_ivafe)
 
     # --- Aggregazione ---
@@ -557,70 +563,74 @@ def main():
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    # Validazioni
-    csv_path = Path(args.csv)
-    if not csv_path.exists():
-        logger.error("File CSV non trovato: %s", csv_path)
-        sys.exit(1)
+    try:
+        # Validazioni
+        csv_path = Path(args.csv)
+        if not csv_path.exists():
+            logger.error("File CSV non trovato: %s", csv_path)
+            sys.exit(1)
 
-    logger.info("=" * 60)
-    logger.info("CALCOLO IVAFE — Quadro RW")
-    logger.info("=" * 60)
-    logger.info("CSV input:     %s", csv_path)
-    logger.info("Anno fiscale:  %d", args.anno)
-    logger.info("Ticker:        %s", args.ticker)
-    logger.info("Cutoffs:       %s", [d.isoformat() for d in args.cutoff] if args.cutoff else "nessuno")
-    logger.info(
-        "Anno bisestile: %s (%d giorni)",
-        "Sì" if is_leap_year(args.anno) else "No",
-        days_in_year(args.anno),
-    )
-    logger.info("=" * 60)
-
-    # Carica CSV
-    df = load_csv(str(csv_path))
-
-    # Calcola IVAFE
-    result = compute_ivafe(
-        df,
-        anno_fiscale=args.anno,
-        ticker=args.ticker,
-        cutoffs=args.cutoff,
-    )
-
-    if result.empty:
-        logger.warning("Nessun risultato da esportare.")
-        sys.exit(0)
-
-    # Stampa formattata a schermo
-    print("\n")
-    print("=" * 80)
-    print(f"  QUADRO RW — IVAFE Anno Fiscale {args.anno}")
-    print("=" * 80)
-    print(
-        tabulate(
-            result,
-            headers="keys",
-            tablefmt="fancy_grid",
-            showindex=False,
-            numalign="right",
-            stralign="center",
-            floatfmt=".2f"
+        logger.info("=" * 60)
+        logger.info("CALCOLO IVAFE — Quadro RW")
+        logger.info("=" * 60)
+        logger.info("CSV input:     %s", csv_path)
+        logger.info("Anno fiscale:  %d", args.anno)
+        logger.info("Ticker:        %s", args.ticker)
+        logger.info("Cutoffs:       %s", [d.isoformat() for d in args.cutoff] if args.cutoff else "nessuno")
+        logger.info(
+            "Anno bisestile: %s (%d giorni)",
+            "Sì" if is_leap_year(args.anno) else "No",
+            days_in_year(args.anno),
         )
-    )
-    print("=" * 80)
+        logger.info("=" * 60)
 
-    # Riepilogo
-    ivafe_totale = result["IVAFE"].sum()
-    print(f"\n  IVAFE TOTALE: €{ivafe_totale:.2f}")
-    print("=" * 80)
+        # Carica CSV
+        df = load_csv(str(csv_path))
 
-    # Export CSV
-    output_name = f"quadro_rw_{args.anno}_{args.ticker}.csv"
-    output_path = csv_path.parent / output_name
-    result.to_csv(output_path, index=False)
-    logger.info("Risultati esportati in: %s", output_path)
-    print(f"\n  Output CSV salvato in: {output_path}\n")
+        # Calcola IVAFE
+        result = compute_ivafe(
+            df,
+            anno_fiscale=args.anno,
+            ticker=args.ticker,
+            cutoffs=args.cutoff,
+        )
+
+        if result.empty:
+            logger.warning("Nessun risultato da esportare.")
+            sys.exit(0)
+
+        # Stampa formattata a schermo
+        print("\n")
+        print("=" * 80)
+        print(f"  QUADRO RW — IVAFE Anno Fiscale {args.anno}")
+        print("=" * 80)
+        print(
+            tabulate(
+                result,
+                headers="keys",
+                tablefmt="fancy_grid",
+                showindex=False,
+                numalign="right",
+                stralign="center",
+                floatfmt=".2f"
+            )
+        )
+        print("=" * 80)
+
+        # Riepilogo
+        ivafe_totale = result["IVAFE"].sum()
+        print(f"\n  IVAFE TOTALE: €{ivafe_totale:.2f}")
+        print("=" * 80)
+
+        # Export CSV
+        output_name = f"quadro_rw_{args.anno}_{args.ticker}.csv"
+        output_path = csv_path.parent / output_name
+        result.to_csv(output_path, index=False)
+        logger.info("Risultati esportati in: %s", output_path)
+        print(f"\n  Output CSV salvato in: {output_path}\n")
+    except Exception as e:
+        logger.error("Errore fatale durante l'esecuzione: %s", e)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
