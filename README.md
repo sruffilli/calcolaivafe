@@ -40,15 +40,21 @@ Il comando base richiede il file CSV e l'anno fiscale:
 python .gemini/skills/calcola-ivafe/scripts/calcola_ivafe.py --csv ss.csv --anno 2025
 ```
 
-### Esempio con Rolling Cutoff
-Se hai svuotato il conto il 30 Giugno 2025 e vuoi conteggiare solo il possesso fino a quel momento per le azioni precedenti:
+### Funzionalità Avanzate
+
+#### Rolling Cutoffs (Liquidazioni Totali)
+Se durante l'anno (o in quelli passati) hai venduto o trasferito **tutte** le azioni presenti nel conto, puoi usare il parametro `--cutoff`. Lo script supporta date multiple.
+Ogni azione viene assegnata al **primo cutoff** che si verifica alla data di maturazione o dopo di essa. Questo simula uno svuotamento periodico del conto.
 
 ```bash
-python .gemini/skills/calcola_ivafe.py --csv ss.csv --anno 2025 --cutoff 2025-06-30
+python .gemini/skills/calcola-ivafe/scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --cutoff 2024-11-24 2025-06-30
 ```
 
+#### Colonna 'Sale Date' (Vendite Singole)
+Se il tuo file (CSV o TSV) include una colonna intitolata `Sale Date` o `Data Vendita`, lo script userà quella data specifica come termine del possesso per quella riga. La data di vendita prevale sulla fine dell'anno se precedente. Questo permette una precisione millimetrica per vendite di singoli blocchi.
+
 ### Parametri
-- `--csv`: Percorso del file estratto conto.
+- `--csv`: Percorso del file estratto conto (supporta sia CSV che TSV).
 - `--anno`: Anno fiscale di riferimento (default: anno precedente).
 - `--cutoff`: Una o più date (YYYY-MM-DD) di liquidazione totale.
 - `--ticker`: Ticker Yahoo Finance (default: `GOOG`).
