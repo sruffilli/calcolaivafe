@@ -32,11 +32,6 @@ from tabulate import tabulate
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -315,7 +310,10 @@ def load_csv(csv_path: str) -> pd.DataFrame:
     df = df[df["shares_deposited"] > 0]
 
     logger.info("Caricate %d righe valide dal CSV", len(df))
-    return df[["vesting_date", "shares_deposited", "sale_date", "Purno"]].reset_index(drop=True)
+    cols = ["vesting_date", "shares_deposited", "sale_date"]
+    if "Purno" in df.columns:
+        cols.append("Purno")
+    return df[cols].reset_index(drop=True)
 
 
 # ===================================================================
@@ -539,12 +537,25 @@ def build_parser() -> argparse.ArgumentParser:
         "--ticker", default="GOOG",
         help="Ticker del titolo su Yahoo Finance (default: GOOG).",
     )
+    parser.add_argument(
+        "--loglevel", default="WARNING",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        help="Livello di logging (default: WARNING).",
+    )
     return parser
 
 
 def main():
     parser = build_parser()
     args = parser.parse_args()
+
+    # Configura logging
+    numeric_level = getattr(logging, args.loglevel.upper(), None)
+    logging.basicConfig(
+        level=numeric_level,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
     # Validazioni
     csv_path = Path(args.csv)
