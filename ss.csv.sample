@@ -1,0 +1,5 @@
+"Alphabet, Inc. - GSUs (Anonymized Sample)"
+Purno,Jurisdiction,Award Date,Vesting Date,GSUs Vested,Shares Deposited,Fair Market Value,Amount Subject to Tax Withholding,Local 1,Total Tax Withheld at Broker,GSU Fractional Share Refund,FX Rate,Currency,Release Type,Award Number,Historical Purno,Sale Date
+SAMPLE001,Italy,01-Jan-2023,25-Jan-2024,10.0,5.0,$150.00,"$1,500.00","$750.00","$750.00",$0.00,,USD,WCF,AWARD001,,
+SAMPLE002,Italy,01-Jan-2024,25-Jan-2025,20.0,10.0,$160.00,"$3,200.00","$1,600.00","$1,600.00",$0.00,,USD,WCF,AWARD002,,2025-06-30
+SAMPLE003,Italy,01-Jan-2024,25-Mar-2025,15.0,7.5,$170.00,"$2,550.00","$1,275.00","$1,275.00",$0.00,,USD,WCF,AWARD003,,
