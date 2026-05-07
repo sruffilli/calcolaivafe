@@ -43,13 +43,13 @@ _stock_price_cache: dict[str, float] = {}
 # ---------------------------------------------------------------------------
 # Costanti Quadro RW
 # ---------------------------------------------------------------------------
-CODICE_TITOLO_POSSESSO = "1"
+CODICE_TITOLO_POSSESSO = "1"   # 1 = Proprietà
 VEDERE_ISTRUZIONI = "2"
-CODICE_INDIVIDUAZ_BENE = "2"
-CODICE_STATO_ESTERO = "069"
-QUOTA_POSSESSO = "100"
-CRITERIO_DETERMIN_VALORE = "1"
-ALIQUOTA_IVAFE = 0.002
+CODICE_INDIVIDUAZ_BENE = "2"   # 2 = Titoli esteri
+CODICE_STATO_ESTERO = "069"    # 069 = USA
+QUOTA_POSSESSO = "100"         # 100%
+CRITERIO_DETERMIN_VALORE = "1" # 1 = Valore di mercato
+ALIQUOTA_IVAFE = 0.002         # 0.2% (White List)
 
 # ---------------------------------------------------------------------------
 # Mapping colonne CSV — cerchiamo per NOME, mai per posizione
@@ -327,7 +327,11 @@ def compute_ivafe(df: pd.DataFrame, anno_fiscale: int, ticker: str = "GOOG",
     """
     anno_start = date(anno_fiscale, 1, 1)
     anno_end = date(anno_fiscale, 12, 31)
-    total_days = days_in_year(anno_fiscale)
+    
+    # Punto 3: Denominatore giorni
+    # Gli esempi delle istruzioni Quadro RW (es. Fascicolo 2 2026) usano il rapporto giorni/365
+    # anche per anni bisestili, per standardizzare il calcolo.
+    total_days = 365
 
     # --- Pre-caricamento prezzi azioni ---
     preload_start = anno_start - timedelta(days=15)
@@ -420,16 +424,23 @@ def compute_ivafe(df: pd.DataFrame, anno_fiscale: int, ticker: str = "GOOG",
         try:
             price_start = get_stock_price(data_inizio, ticker)
             price_end = get_stock_price(data_finale, ticker)
-            fx_start = get_exchange_rate(data_inizio)
+            
+            # Punto 1: Tasso di cambio iniziale
+            # Circolare 10/E/2014, punto 13.4: per le attività detenute al 1° gennaio si usa il cambio medio del mese di dicembre dell'anno precedente.
+            if row["is_pre_anno"]:
+                fx_start = get_exchange_rate(date(anno_fiscale - 1, 12, 31))
+            else:
+                fx_start = get_exchange_rate(data_inizio)
+                
             fx_end = get_exchange_rate(data_finale)
         except ValueError as e:
             logger.warning("Salto la riga per %s a causa di un errore nel recupero dati: %s", row.get("Purno", "N/A"), e)
             continue
 
-        if not row["is_pre_anno"]:
-            vi = 0.0
-        else:
-            vi = shares * price_start / fx_start
+        # Punto 2: Valore iniziale per nuovi acquisti
+        # Istruzioni Quadro RW (Fascicolo 2 2026, Colonna 7): indicare il valore all'inizio del periodo d'imposta
+        # o al primo giorno di detenzione dell'attività. Quindi per i nuovi acquisti calcoliamo il valore alla data di inizio.
+        vi = shares * price_start / fx_start
             
         vf = shares * price_end / fx_end
         giorni_ivafe = calculate_days(data_inizio, data_finale)
@@ -450,8 +461,6 @@ def compute_ivafe(df: pd.DataFrame, anno_fiscale: int, ticker: str = "GOOG",
     rdf = pd.DataFrame(rows_ivafe)
 
     # --- Aggregazione ---
-    # Aggreghiamo per (is_pre_anno, data_finale)
-    # Questo mantiene separate le azioni vendute in date diverse
     summary = rdf.groupby(["is_pre_anno", "data_finale"]).agg({
         "vi": "sum",
         "vf": "sum",
@@ -468,11 +477,10 @@ def compute_ivafe(df: pd.DataFrame, anno_fiscale: int, ticker: str = "GOOG",
         if vf > 0 and ivafe > 0:
             giorni = round(ivafe * total_days / (vf * ALIQUOTA_IVAFE))
         else:
-            # Se IVAFE è 0 o valore è 0, mettiamo i giorni calcolati tra anno_start e data_finale per pre-anno
             if row["is_pre_anno"]:
                 giorni = calculate_days(anno_start, row["data_finale"])
             else:
-                giorni = 0 # Media pesata per anno corrente è complessa se non c'è IVAFE
+                giorni = 0 
 
         results.append({
             "Codice titolo possesso": CODICE_TITOLO_POSSESSO,

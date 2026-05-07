@@ -59,6 +59,21 @@ Se il tuo file (CSV o TSV) include una colonna intitolata `Sale Date` o `Data Ve
 - `--cutoff`: Una o più date (YYYY-MM-DD) di liquidazione totale.
 - `--ticker`: Ticker Yahoo Finance (default: `GOOG`).
 
+## Riferimenti Normativi e Razionale di Calcolo
+
+Il calcolo dell'IVAFE implementato in questo script segue le direttive dell'Agenzia delle Entrate e le istruzioni del Quadro RW:
+
+### Riferimenti Normativi
+- **Circolare n. 28/E del 2 luglio 2012**: Linee guida generali per l'applicazione dell'IVAFE.
+- **Circolare n. 10/E del 14 maggio 2014 (Quesito 13.4)**: Specifica che per le attività finanziarie detenute alla data del 1° gennaio si deve utilizzare il cambio medio del mese di dicembre dell'anno precedente.
+- **Istruzioni Modello Redditi (Quadro RW)**: Disciplinano la valorizzazione delle attività al valore di mercato (codice 1) e indicano di utilizzare il valore al primo giorno di detenzione per i nuovi acquisti.
+
+### Razionale di Calcolo
+- **Valore Iniziale**: Per le azioni già possedute al 1° gennaio, viene calcolato usando il prezzo a inizio anno e il tasso di cambio medio di dicembre dell'anno precedente. Per le azioni maturate in corso d'anno (vesting), si usa il valore alla data di maturazione.
+- **Valore Finale**: Calcolato al 31 dicembre o alla data di vendita, usando il tasso di cambio medio del mese di riferimento.
+- **Proporzionalità**: L'imposta è calcolata pro-rata sui giorni di effettivo possesso. Come da esempi delle istruzioni ministeriali, il denominatore è fissato a **365** giorni anche per gli anni bisestili.
+- **Aliquota**: Fissata allo **0.2%** (2 per mille) per i titoli detenuti in paesi White List (come gli USA per le azioni Alphabet).
+
 ## Privacy
 Lo script è configurato per ignorare i file `*.csv` tramite `.gitignore`. Viene fornito un file `ss.csv.sample` come riferimento per la struttura dei dati.
 

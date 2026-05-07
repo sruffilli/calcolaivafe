@@ -13,6 +13,9 @@ I file della skill si trovano in `.gemini/skills/calcola-ivafe/scripts/`:
 - `calcola_ivafe.py`: Lo script core con logica di aggregazione e calcolo fiscale.
 - `requirements.txt`: Dipendenze (pandas, yfinance, requests, tabulate).
 
+## Documentazione di Riferimento
+- [IVAFE.md](file:///Users/sruffilli/git/calcolaivafe/IVAFE.md): Report dettagliato sull'architettura normativa dell'IVAFE, criteri di valorizzazione e sanzioni. Utile per comprendere le regole applicate dallo script.
+
 ## Flusso Operativo (Mandatorio)
 
 ### 1. Intervista Iniziale (Preparazione Dati)
