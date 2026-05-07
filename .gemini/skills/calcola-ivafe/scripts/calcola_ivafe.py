@@ -335,7 +335,7 @@ def compute_ivafe(df: pd.DataFrame, anno_fiscale: int, ticker: str = "GOOG",
     
     logger.info("Pre-caricamento prezzi delle azioni per %s dal %s al %s", ticker, preload_start.isoformat(), preload_end.isoformat())
     try:
-        stock_data = yf.download(ticker, start=preload_start.isoformat(), end=preload_end.isoformat())
+        stock_data = yf.download(ticker, start=preload_start.isoformat(), end=preload_end.isoformat(), progress=False)
         if not stock_data.empty:
             # Reindicizza su tutti i giorni di calendario e propaga i valori (ffill)
             all_dates = pd.date_range(start=preload_start, end=preload_end - timedelta(days=1))
