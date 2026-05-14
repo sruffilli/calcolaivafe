@@ -21,6 +21,9 @@ I file della skill si trovano in `.gemini/skills/calcola-ivafe/scripts/`:
 ## Flusso Operativo (Mandatorio)
 
 ### 1. Intervista Iniziale (Preparazione Dati)
+> [!IMPORTANT]
+> Se l'utente non fornisce proattivamente l'anno fiscale o le date di cutoff nel prompt di invocazione, **devi richiederle esplicitamente**. **Non tentare di inferire** queste informazioni dal contesto o dai file.
+
 Prima di eseguire i calcoli, poni queste domande all'utente per raccogliere i parametri necessari:
 
 **Per le Azioni (IVAFE Stocks):**
