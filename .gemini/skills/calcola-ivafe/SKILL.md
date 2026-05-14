@@ -15,8 +15,8 @@ I file della skill si trovano in `.gemini/skills/calcola-ivafe/scripts/`:
 - `requirements.txt`: Dipendenze (pandas, yfinance, requests, tabulate).
 
 ## Documentazione di Riferimento
-- [IVAFE.md](file:///Users/sruffilli/git/calcolaivafe/IVAFE.md): Report sull'architettura normativa dell'IVAFE.
-- [DIVIDENDI.md](file:///Users/sruffilli/git/calcolaivafe/DIVIDENDI.md): Guida al calcolo dei dividendi esteri (Netto Frontiera).
+- [IVAFE.md](file:///Users/sruffilli/git/calcolaivafe/.gemini/skills/calcola-ivafe/references/IVAFE.md): Report sull'architettura normativa dell'IVAFE.
+- [DIVIDENDI.md](file:///Users/sruffilli/git/calcolaivafe/.gemini/skills/calcola-ivafe/references/DIVIDENDI.md): Guida al calcolo dei dividendi esteri (Netto Frontiera).
 
 ## Flusso Operativo (Mandatorio)
 

@@ -113,7 +113,7 @@ Il calcolo dell'IVAFE implementato in questo script segue le direttive dell'Agen
 - **Circolare n. 28/E del 2 luglio 2012**: Linee guida generali per l'applicazione dell'IVAFE.
 - **Circolare n. 10/E del 14 maggio 2014 (Quesito 13.4)**: Specifica che per le attività finanziarie detenute alla data del 1° gennaio si deve utilizzare il cambio medio del mese di dicembre dell'anno precedente.
 - **Istruzioni Modello Redditi (Quadro RW)**: Disciplinano la valorizzazione delle attività al valore di mercato (codice 1) e indicano di utilizzare il valore al primo giorno di detenzione per i nuovi acquisti.
-- **[DIVIDENDI.md](file:///Users/sruffilli/git/calcolaivafe/DIVIDENDI.md)**: Documentazione specifica per il calcolo dei dividendi esteri (Netto Frontiera) e Quadro RM.
+- **[DIVIDENDI.md](file:///Users/sruffilli/git/calcolaivafe/.gemini/skills/calcola-ivafe/references/DIVIDENDI.md)**: Documentazione specifica per il calcolo dei dividendi esteri (Netto Frontiera) e Quadro RM.
 
 ### Razionale di Calcolo
 - **Valore Iniziale**: Per le azioni già possedute al 1° gennaio, viene calcolato usando il prezzo a inizio anno e il tasso di cambio medio di dicembre dell'anno precedente. Per le azioni maturate in corso d'anno (vesting), si usa il valore alla data di maturazione.
