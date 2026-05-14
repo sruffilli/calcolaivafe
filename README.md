@@ -37,6 +37,38 @@ Progettato specificamente per la gestione di **Google GSUs** (Alphabet Inc.) e c
 
 Lo strumento offre due script principali per diversi calcoli fiscali.
 
+### Come ottenere i file di input da Morgan Stanley
+
+Lo strumento richiede due file diversi a seconda del calcolo da effettuare.
+
+#### 1. File per Azioni (ss.csv)
+Per lo script `calcola_ivafe.py`:
+1. Accedi a **Morgan Stanley atWork** (es. tramite il link `go/mssb` se disponibile, o direttamente su `https://atwork.morganstanley.com`).
+2. Nel menu superiore, clicca su **Activity** > **Your Alphabet Stock Statement**.
+3. Imposta:
+   - **Reporting Period**: `All available history`.
+   - **Choose a currency**: `USD`.
+   - **Output Format**: `CSV`.
+4. Clicca su **Run Report**.
+5. Scarica il file tramite il link `"Please click here to download"` e rinominalo in `ss.csv`.
+
+#### 2. File per Dividendi e Cash (activity-summary.csv)
+Per lo script `calcola_dividendi.py`:
+1. Accedi a **Morgan Stanley atWork**.
+2. Nel menu superiore, naviga su **Activity** > **Reports** > **Account Summary**.
+3. Nella pagina di configurazione, imposta:
+   - **Period Quick Select**: `All Available History` (o seleziona il periodo desiderato).
+   - **Product Selection**: Spunta sia `Share & Cash Holdings` che `Equity Awards`.
+   - **View As**: Seleziona `Web Page`.
+   - **Account Summary Type**: Seleziona `Full`.
+4. Clicca su **Submit** e attendi la generazione (può richiedere un minuto).
+5. Scorri fino in fondo alla pagina (un trucco veloce è cercare con CTRL+F la stringa `"IRS Nonresident Alien Withholding"`).
+6. Seleziona e copia tutta la tabella intitolata **Activity** (quella con colonne: *Entry Date, Activity, Type of Money, Cash, Number of Shares*, ecc.) partendo dalla riga di intestazione fino alla fine.
+7. Incolla i dati in un foglio di calcolo (es. Google Sheets).
+8. Esporta il foglio in formato **CSV** e salvalo come `activity-summary.csv` nella cartella del progetto.
+
+---
+
 ### 1. Calcolo IVAFE Azioni (Quadro RW)
 
 Il comando base richiede il file CSV delle azioni e l'anno fiscale:
@@ -59,10 +91,10 @@ Se il tuo file include una colonna intitolata `Sale Date` o `Data Vendita`, lo s
 
 ### 2. Calcolo Dividendi e IVAFE Cassa (Quadri RM e RW)
 
-Il comando richiede il file riepilogativo del conto (`account-summary.csv`) e l'anno fiscale:
+Il comando richiede il file riepilogativo del conto (`activity-summary.csv`) e l'anno fiscale:
 
 ```bash
-python .gemini/skills/calcola-ivafe/scripts/calcola_dividendi.py --csv account-summary.csv --anno 2025
+python .gemini/skills/calcola-ivafe/scripts/calcola_dividendi.py --csv activity-summary.csv --anno 2025
 ```
 
 ### Parametri Comuni e Specifici
