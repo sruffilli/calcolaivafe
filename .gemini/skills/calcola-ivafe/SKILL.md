@@ -22,7 +22,8 @@ I file della skill si trovano in `.gemini/skills/calcola-ivafe/scripts/`:
 
 ### 1. Intervista Iniziale (Preparazione Dati)
 > [!IMPORTANT]
-> Se l'utente non fornisce proattivamente l'anno fiscale o le date di cutoff nel prompt di invocazione, **devi richiederle esplicitamente**. **Non tentare di inferire** queste informazioni dal contesto o dai file.
+> - Se l'utente non fornisce proattivamente l'anno fiscale o le date di cutoff nel prompt di invocazione, **devi richiederle esplicitamente**. **Non tentare di inferire** queste informazioni dal contesto o dai file.
+> - Se i file di input (`ss.csv` o `activity-summary.csv`) non sono presenti nel workspace, **chiedi all'utente di fornirli** e indirizzalo al file `README.md` per le istruzioni dettagliate su come scaricarli da Morgan Stanley.
 
 Prima di eseguire i calcoli, poni queste domande all'utente per raccogliere i parametri necessari:
 
@@ -32,7 +33,7 @@ Prima di eseguire i calcoli, poni queste domande all'utente per raccogliere i pa
 3.  **Vendite Singole**: "Hai effettuato vendite di singoli blocchi? In tal caso, assicurati che il CSV contenga la colonna 'Sale Date' (o 'Data Vendita')."
 
 **Per i Dividendi e Cash (Quadro RM e IVAFE Cash):**
-4.  **File Estratto Conto**: "Assicurati di avere il file completo `account-summary.csv`."
+4.  **File Estratto Conto**: "Assicurati di avere il file completo `activity-summary.csv`."
 5.  **Date di Cutover Cash**: "Ci sono state date in cui il conto cash (dove si accumulano i dividendi) è stato svuotato o azzerato?"
 
 ### 2. Funzionamento di Cutoffs e Sale Date (Spiegazione all'Utente)
@@ -44,7 +45,8 @@ Spiega all'utente come lo script userà le date fornite:
 Configura l'ambiente e lancia gli script appropriati:
 
 ```bash
-uv venv .venv
+# Crea il venv solo se non esiste
+[ -d .venv ] || uv venv .venv
 source .venv/bin/activate
 uv pip install -r .gemini/skills/calcola-ivafe/scripts/requirements.txt
 ```
