@@ -1,15 +1,16 @@
-# Calcola IVAFE — Automazione Quadro RW
+# Calcola IVAFE — Automazione Quadro RW e RM
 
-Strumento Python per il calcolo automatico dell'imposta **IVAFE** e la generazione delle righe per il **Quadro RW** della dichiarazione dei redditi italiana. 
+Strumento Python per il calcolo automatico dell'imposta **IVAFE** (Azioni e Liquidità), dei dividendi esteri e la generazione delle righe per i quadri **RW** e **RM** della dichiarazione dei redditi italiana. 
 
-Progettato specificamente per la gestione di **Google GSUs** (Alphabet Inc.), ma estensibile a qualsiasi titolo estero tracciabile su Yahoo Finance.
+Progettato specificamente per la gestione di **Google GSUs** (Alphabet Inc.) e conti Morgan Stanley, ma estensibile a qualsiasi titolo estero tracciabile su Yahoo Finance.
 
 ## Caratteristiche Principali
 
 - 📈 **Integrazione API**: Recupero automatico dei prezzi storici tramite `yfinance` e dei tassi di cambio ufficiali (USD/EUR) tramite le API di **Banca d'Italia**.
 - 🔄 **Rolling Cutoff Strategy**: Supporto per la gestione di liquidazioni totali in date multiple. Utile se vendi tutto e ricominci ad accumulare, permettendo di calcolare i giorni di possesso effettivi.
 - 📂 **Parsing Dinamico**: Supporta il formato CSV di Morgan Stanley e permette di specificare date di vendita (`Sale Date`) riga per riga.
-- 📋 **Quadro RW Ready**: Genera un file CSV aggregato secondo i criteri richiesti dal Quadro RW (aggregazione per date e codici stato).
+- 📋 **Quadro RW e RM Ready**: Genera file CSV aggregati secondo i criteri richiesti dai quadri RW (Azioni e Cash) e RM (Dividendi).
+- 💰 **Dividendi e Cash**: Calcolo del "Netto Frontiera" per i dividendi e della giacenza media della liquidità per l'IVAFE.
 - ⚡ **Cache In-Memory**: Ottimizzato per evitare chiamate API ridondanti durante l'elaborazione di grandi dataset.
 
 ## Requisiti
@@ -34,30 +35,43 @@ Progettato specificamente per la gestione di **Google GSUs** (Alphabet Inc.), ma
 
 ## Utilizzo
 
-Il comando base richiede il file CSV e l'anno fiscale:
+Lo strumento offre due script principali per diversi calcoli fiscali.
+
+### 1. Calcolo IVAFE Azioni (Quadro RW)
+
+Il comando base richiede il file CSV delle azioni e l'anno fiscale:
 
 ```bash
 python .gemini/skills/calcola-ivafe/scripts/calcola_ivafe.py --csv ss.csv --anno 2025
 ```
 
-### Funzionalità Avanzate
+#### Funzionalità Avanzate
 
-#### Rolling Cutoffs (Liquidazioni Totali)
+**Rolling Cutoffs (Liquidazioni Totali)**
 Se durante l'anno (o in quelli passati) hai venduto o trasferito **tutte** le azioni presenti nel conto, puoi usare il parametro `--cutoff`. Lo script supporta date multiple.
-Ogni azione viene assegnata al **primo cutoff** che si verifica alla data di maturazione o dopo di essa. Questo simula uno svuotamento periodico del conto.
 
 ```bash
 python .gemini/skills/calcola-ivafe/scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --cutoff 2024-11-24 2025-06-30
 ```
 
-#### Colonna 'Sale Date' (Vendite Singole)
-Se il tuo file (CSV o TSV) include una colonna intitolata `Sale Date` o `Data Vendita`, lo script userà quella data specifica come termine del possesso per quella riga. La data di vendita prevale sulla fine dell'anno se precedente. Questo permette una precisione millimetrica per vendite di singoli blocchi.
+**Colonna 'Sale Date' (Vendite Singole)**
+Se il tuo file include una colonna intitolata `Sale Date` o `Data Vendita`, lo script userà quella data come termine del possesso.
 
-### Parametri
-- `--csv`: Percorso del file estratto conto (supporta sia CSV che TSV).
+### 2. Calcolo Dividendi e IVAFE Cassa (Quadri RM e RW)
+
+Il comando richiede il file riepilogativo del conto (`account-summary.csv`) e l'anno fiscale:
+
+```bash
+python .gemini/skills/calcola-ivafe/scripts/calcola_dividendi.py --csv account-summary.csv --anno 2025
+```
+
+### Parametri Comuni e Specifici
+- `--csv`: Percorso del file estratto conto (CSV o TSV).
 - `--anno`: Anno fiscale di riferimento (default: anno precedente).
-- `--cutoff`: Una o più date (YYYY-MM-DD) di liquidazione totale.
-- `--ticker`: Ticker Yahoo Finance (default: `GOOG`).
+- `--cutoff`: 
+  - Per `calcola_ivafe.py`: Una o più date di liquidazione totale.
+  - Per `calcola_dividendi.py`: Data di azzeramento del conto cash.
+- `--ticker`: (Solo per `calcola_ivafe.py`) Ticker Yahoo Finance (default: `GOOG`).
 
 ## Riferimenti Normativi e Razionale di Calcolo
 
@@ -67,6 +81,7 @@ Il calcolo dell'IVAFE implementato in questo script segue le direttive dell'Agen
 - **Circolare n. 28/E del 2 luglio 2012**: Linee guida generali per l'applicazione dell'IVAFE.
 - **Circolare n. 10/E del 14 maggio 2014 (Quesito 13.4)**: Specifica che per le attività finanziarie detenute alla data del 1° gennaio si deve utilizzare il cambio medio del mese di dicembre dell'anno precedente.
 - **Istruzioni Modello Redditi (Quadro RW)**: Disciplinano la valorizzazione delle attività al valore di mercato (codice 1) e indicano di utilizzare il valore al primo giorno di detenzione per i nuovi acquisti.
+- **[DIVIDENDI.md](file:///Users/sruffilli/git/calcolaivafe/DIVIDENDI.md)**: Documentazione specifica per il calcolo dei dividendi esteri (Netto Frontiera) e Quadro RM.
 
 ### Razionale di Calcolo
 - **Valore Iniziale**: Per le azioni già possedute al 1° gennaio, viene calcolato usando il prezzo a inizio anno e il tasso di cambio medio di dicembre dell'anno precedente. Per le azioni maturate in corso d'anno (vesting), si usa il valore alla data di maturazione.
