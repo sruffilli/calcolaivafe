@@ -24,24 +24,9 @@ L'assistente leggerà le istruzioni in `SKILL.md` e ti guiderà passo passo, chi
 
 ---
 
-## 🐍 Utilizzo alternativo tramite Script Python (Opzionale)
+## 📂 Preparazione Dati: Scaricare i file da Morgan Stanley
 
-Se preferisci eseguire i calcoli manualmente senza l'ausilio dell'AI, puoi utilizzare direttamente gli script Python presenti nel repository.
-
-### Requisiti per uso manuale
-- Python 3.10+
-- [uv](https://github.com/astral-sh/uv) (consigliato)
-
-### Configurazione Ambiente
-```bash
-uv venv
-source .venv/bin/activate
-uv pip install -r .gemini/skills/calcola-ivafe/scripts/requirements.txt
-```
-
-### Come ottenere i file di input da Morgan Stanley
-
-Lo strumento richiede due file diversi a seconda del calcolo da effettuare.
+Lo strumento richiede due file diversi a seconda del calcolo da effettuare. **Nota: Il recupero di questi file è un passo preliminare obbligatorio sia per l'utilizzo tramite Skill Gemini che per l'uso manuale degli script.**
 
 #### 1. File per Azioni (ss.csv)
 Per lo script `calcola_ivafe.py`:
@@ -70,6 +55,23 @@ Per lo script `calcola_dividendi.py`:
 8. Esporta il foglio in formato **CSV** e salvalo come `activity-summary.csv` nella cartella del progetto.
 
 ---
+
+## 🐍 Utilizzo alternativo tramite Script Python (Opzionale)
+
+Se preferisci eseguire i calcoli manualmente senza l'ausilio dell'AI, puoi utilizzare direttamente gli script Python presenti nel repository.
+
+### Requisiti per uso manuale
+- Python 3.10+
+- [uv](https://github.com/astral-sh/uv) (consigliato)
+
+### Configurazione Ambiente
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install -r .gemini/skills/calcola-ivafe/scripts/requirements.txt
+```
+
+
 
 ### 1. Calcolo IVAFE Azioni (Quadro RW)
 
