@@ -43,3 +43,8 @@ La compilazione pratica segue le istruzioni del [Fascicolo 2 dell'Agenzia delle 
 - **Colonna 10 (Giorni)**: Numero di giorni di detenzione (rapportati a 365).
 - **Colonna 11 (IVAFE Calcolata)**: Risultato dell'applicazione dell'aliquota sul valore finale rapportato ai giorni e alla quota.
 - **Colonna 14 (Credito d'Imposta)**: Detrazione per eventuali imposte patrimoniali pagate all'estero sullo stesso asset (fino a concorrenza dell'imposta dovuta).
+
+## 7. Nota sui Redditi di Capitale (Dividendi)
+L'IVAFE è un'imposta patrimoniale che si applica sul valore delle attività finanziarie detenute all'estero (lo *stock* di capitale). I proventi derivanti da tali attività, come i **dividendi**, costituiscono invece redditi di capitale e non sono soggetti a IVAFE in sé.
+- I dividendi vanno dichiarati nel **Quadro RM** e tassati con imposta sostitutiva del 26% (applicando il principio del "Netto Frontiera").
+- Tuttavia, se i dividendi percepiti vengono mantenuti sul conto corrente estero, essi concorrono a formare la giacenza del conto stesso. Se la giacenza media supera i 5.000 euro, il conto sarà soggetto all'IVAFE fissa di 34,20 euro (come descritto nella Deroga Bancaria).
