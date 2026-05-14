@@ -1,56 +1,43 @@
-# Calcola IVAFE — Automazione Quadro RW e RM
+# Calcola IVAFE — Skill per Gemini (Quadro RW e RM)
 
-Strumento Python per il calcolo automatico dell'imposta **IVAFE** (Azioni e Liquidità), dei dividendi esteri e la generazione delle righe per i quadri **RW** e **RM** della dichiarazione dei redditi italiana. 
+Questo repository contiene **una Skill per Gemini** (disponibile nella cartella `.gemini/skills/calcola-ivafe/`). Consente a un assistente AI abilitato di guidarti ed eseguire automaticamente il calcolo dell'imposta **IVAFE** (Azioni e Liquidità) e dei dividendi esteri, generando le righe per i quadri **RW** e **RM** della dichiarazione dei redditi italiana.
 
 Progettato specificamente per la gestione di **Google GSUs** (Alphabet Inc.) e conti Morgan Stanley, ma estensibile a qualsiasi titolo estero tracciabile su Yahoo Finance.
 
-## Caratteristiche Principali
+## 🤖 Come usare la Skill con Gemini (Metodo Principale)
 
-- 📈 **Integrazione API**: Recupero automatico dei prezzi storici tramite `yfinance` e dei tassi di cambio ufficiali (USD/EUR) tramite le API di **Banca d'Italia**.
-- 🔄 **Rolling Cutoff Strategy**: Supporto per la gestione di liquidazioni totali in date multiple. Utile se vendi tutto e ricominci ad accumulare, permettendo di calcolare i giorni di possesso effettivi.
-- 📂 **Parsing Dinamico**: Supporta il formato CSV di Morgan Stanley e permette di specificare date di vendita (`Sale Date`) riga per riga.
-- 📋 **Quadro RW e RM Ready**: Genera file CSV aggregati secondo i criteri richiesti dai quadri RW (Azioni e Cash) e RM (Dividendi).
-- 💰 **Dividendi e Cash**: Calcolo del "Netto Frontiera" per i dividendi e della giacenza media della liquidità per l'IVAFE.
-- ⚡ **Cache In-Memory**: Ottimizzato per evitare chiamate API ridondanti durante l'elaborazione di grandi dataset.
+Se stai usando un ambiente compatibile con le skill di Gemini (come questo), puoi invocare la skill semplicemente chiedendo all'assistente di eseguire il calcolo.
 
-## Requisiti
-
-- Python 3.10+
-- [uv](https://github.com/astral-sh/uv) (consigliato per la gestione rapida del venv)
-
-## Installazione
-
-1. Clona il repository:
-   ```bash
-   git clone https://github.com/sruffilli/calcolaivafe.git
-   cd calcolaivafe
-   ```
-
-2. Configura l'ambiente:
-   ```bash
-   uv venv
-   source .venv/bin/activate
-   uv pip install -r .gemini/skills/calcola-ivafe/scripts/requirements.txt
-   ```
-
-## Skill Gemini
-
-Questo repository include una **Skill per Gemini** (nella cartella `.gemini/skills/calcola-ivafe/`) che consente all'assistente AI di guidarti ed eseguire i calcoli per tuo conto.
-
-### Come usarla con Gemini
-Se stai usando un ambiente compatibile con le skill di Gemini puoi invocare la skill semplicemente chiedendo all'assistente di eseguire il calcolo dell'IVAFE o dei dividendi.
-
-Esempio di invocazione:
+**Esempio di invocazione:**
 - *"Usa la skill `calcola-ivafe` per calcolare i quadri RW e RM per l'anno 2024, con una data di cutoff per le azioni del 2024-11-20"*
-- *"Calcola i dividendi usando la skill dedicata"*
 
-L'assistente leggerà le istruzioni in `SKILL.md` e ti guiderà passo passo, chiedendoti i parametri necessari e i file di input.
+L'assistente leggerà le istruzioni in `SKILL.md` e ti guiderà passo passo, chiedendoti i parametri necessari e i file di input. Se non sai come ottenere i file da Morgan Stanley, consulta la sezione successiva.
+
+## 📈 Caratteristiche Principali
+
+- 📊 **Integrazione API**: Recupero automatico dei prezzi storici tramite `yfinance` e dei tassi di cambio ufficiali (USD/EUR) tramite le API di **Banca d'Italia**.
+- 🔄 **Rolling Cutoff Strategy**: Supporto per la gestione di liquidazioni totali in date multiple.
+- 📂 **Parsing Dinamico**: Supporta il formato CSV di Morgan Stanley e vendite singole.
+- 📋 **Quadro RW e RM Ready**: Genera file CSV aggregati per i quadri RW (Azioni e Cash) e RM (Dividendi).
+- 💰 **Dividendi e Cash**: Calcolo del "Netto Frontiera" e della giacenza media della liquidità.
+- ⚡ **Cache In-Memory**: Ottimizzato per evitare chiamate API ridondanti.
 
 ---
 
-## Utilizzo
+## 🐍 Utilizzo alternativo tramite Script Python (Opzionale)
 
-Lo strumento offre due script principali per diversi calcoli fiscali.
+Se preferisci eseguire i calcoli manualmente senza l'ausilio dell'AI, puoi utilizzare direttamente gli script Python presenti nel repository.
+
+### Requisiti per uso manuale
+- Python 3.10+
+- [uv](https://github.com/astral-sh/uv) (consigliato)
+
+### Configurazione Ambiente
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install -r .gemini/skills/calcola-ivafe/scripts/requirements.txt
+```
 
 ### Come ottenere i file di input da Morgan Stanley
 
