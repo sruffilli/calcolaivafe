@@ -38,7 +38,7 @@ Progettato specificamente per la gestione di **Google GSUs** (Alphabet Inc.) e c
 Questo repository include una **Skill per Gemini** (nella cartella `.gemini/skills/calcola-ivafe/`) che consente all'assistente AI di guidarti ed eseguire i calcoli per tuo conto.
 
 ### Come usarla con Gemini
-Se stai usando un ambiente compatibile con le skill di Gemini (come questo), puoi invocare la skill semplicemente chiedendo all'assistente di eseguire il calcolo dell'IVAFE o dei dividendi.
+Se stai usando un ambiente compatibile con le skill di Gemini puoi invocare la skill semplicemente chiedendo all'assistente di eseguire il calcolo dell'IVAFE o dei dividendi.
 
 Esempio di invocazione:
 - *"Usa la skill `calcola-ivafe` per calcolare i quadri RW e RM per l'anno 2024, con una data di cutoff per le azioni del 2024-11-20"*
