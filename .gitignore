@@ -3,3 +3,4 @@
 !*.csv.sample
 __pycache__/
 .DS_Store
+.jetskicli/
