@@ -9,7 +9,8 @@ Progettato specificamente per la gestione di **Google GSUs** (Alphabet Inc.) e c
 Se stai usando un ambiente compatibile con le skill di Gemini (come questo), puoi invocare la skill semplicemente chiedendo all'assistente di eseguire il calcolo.
 
 **Esempio di invocazione:**
-- *"Usa la skill `calcola-ivafe` per calcolare i quadri RW e RM per l'anno 2024, con una data di cutoff per le azioni del 2024-11-20"*
+- *"Calcola le tasse per l'anno 2025"*
+- *"Usa la skill `calcola-ivafe` per calcolare i quadri RW e RM per l'anno 2025, con una data di cutoff per le azioni del 2025-11-20"*
 
 L'assistente leggerà le istruzioni in `SKILL.md` e ti guiderà passo passo, chiedendoti i parametri necessari e i file di input. Se non sai come ottenere i file da Morgan Stanley, consulta la sezione successiva.
 
@@ -31,7 +32,7 @@ Lo strumento richiede due file diversi a seconda del calcolo da effettuare. **No
 #### 1. File per Azioni (ss.csv)
 Per lo script `calcola_ivafe.py`:
 1. Accedi a **Morgan Stanley atWork** (es. tramite il link `go/mssb` se disponibile, o direttamente su `https://atwork.morganstanley.com`).
-2. Nel menu superiore, clicca su **Activity** > **Your Alphabet Stock Statement**.
+2. Nel menu superiore, clicca su **Activity** > **Reports** > **Your Alphabet Stock Statement**.
 3. Imposta:
    - **Reporting Period**: `All available history`.
    - **Choose a currency**: `USD`.
