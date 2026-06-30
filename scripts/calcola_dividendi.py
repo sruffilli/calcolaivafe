@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "pandas",
+#     "requests",
+# ]
+# ///
 """
 Calcolo Tasse Dividendi e IVAFE su Cash.
 """

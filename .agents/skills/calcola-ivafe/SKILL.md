@@ -66,29 +66,23 @@ Spiega all'utente come lo script userà le date fornite:
 - **Cutoffs Multipli (Stock)**: Lo script li usa per chiudere automaticamente le finestre di possesso delle azioni maturate fino a quel momento.
 - **Cutoffs Cash**: Lo script resetta a zero il saldo accumulato da quella data in poi per il calcolo della giacenza media.
 
-### 3. Esecuzione Tecnica
-Configura l'ambiente e lancia gli script appropriati:
+### 3. Esecuzione Tecnica (Consigliata tramite `uv`)
+> [!NOTE]
+> Gli script utilizzano i metadati in linea per le dipendenze. Usa preferibilmente `uv run` per eseguire gli script senza dover configurare manualmente l'ambiente.
 
-```bash
-# Crea il venv solo se non esiste
-[ -d .venv ] || uv venv .venv
-source .venv/bin/activate
-uv pip install -r scripts/requirements.txt
-```
-
-> [!TIP]
-> Se riscontri errori di autenticazione (401) durante l'installazione, prova a forzare l'indice pubblico:
-> `uv pip install --index-url https://pypi.org/simple -r scripts/requirements.txt`
+Se l'ambiente supporta `uv`, esegui direttamente:
 
 **Esecuzione Calcolo Stock:**
 ```bash
-python scripts/calcola_ivafe.py --csv report_azioni.csv --anno 2024 --account-summary account-summary.csv
+uv run scripts/calcola_ivafe.py --csv report_azioni.csv --anno 2024 --account-summary account-summary.csv
 ```
 
 **Esecuzione Calcolo Dividendi e IVAFE Cash:**
 ```bash
-python scripts/calcola_dividendi.py --csv account-summary.csv --anno 2024 --cutoff 2024-10-01
+uv run scripts/calcola_dividendi.py --csv account-summary.csv --anno 2024 --cutoff 2024-10-01
 ```
+
+*(In caso di fallback senza `uv`, crea un virtual environment, installa da `scripts/requirements.txt` ed esegui con `python`)*
 
 ## Risultati
 Gli script generano tabelle testuali e file CSV (`quadro_rw_...csv` e `quadro_rm_...csv`). Verifica con l'utente se i risultati riflettono la sua situazione reale prima di considerare il compito concluso.

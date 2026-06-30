@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "pandas",
+#     "requests",
+#     "yfinance",
+#     "tabulate",
+# ]
+# ///
 """
 Calcolo IVAFE per Quadro RW - Dichiarazione dei redditi italiana.
 

@@ -41,28 +41,35 @@ Per il calcolo di dividendi e liquidità:
 Puoi eseguire i calcoli manualmente sul tuo computer.
 
 ### Requisiti
-- Python 3.10+
-- [uv](https://github.com/astral-sh/uv) (consigliato per la gestione rapida delle dipendenze)
+- [uv](https://github.com/astral-sh/uv) (consigliato, gestisce automaticamente dipendenze e ambienti) o Python 3.10+ con installazione manuale delle dipendenze.
 
-### Configurazione Ambiente
-```bash
-uv venv
-source .venv/bin/activate
-uv pip install -r scripts/requirements.txt
-```
+### 🚀 Esecuzione rapida con `uv` (Raccomandato)
+Non è necessario creare un virtual environment o installare dipendenze. `uv` si occuperà di tutto in automatico leggendo i metadati all'interno degli script.
 
-### 1. Calcolo IVAFE Azioni (Quadro RW)
+**1. Calcolo IVAFE Azioni (Quadro RW):**
 ```bash
-python scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --account-summary activity-summary.csv
+uv run scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --account-summary activity-summary.csv
 ```
-*   **Rilevamento Automatico dei Cutoff**: Passando `--account-summary`, lo script rileverà automaticamente le date di trasferimento delle azioni (attività `Transfer out`) e le userà come cutoff.
-*   **Cutoff Manuali (Opzionale)**: Puoi comunque forzare ulteriori date di cutoff manualmente:
+*   **Rilevamento Automatico dei Cutoff**: Lo script rileverà automaticamente le date di trasferimento delle azioni (`Transfer out`) da `activity-summary.csv`.
+*   **Cutoff Manuali (Opzionale)**:
     ```bash
-    python scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --account-summary activity-summary.csv --cutoff 2025-11-20
+    uv run scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --account-summary activity-summary.csv --cutoff 2025-11-20
     ```
 
-### 2. Calcolo Dividendi e IVAFE Cassa (Quadri RM e RW)
+**2. Calcolo Dividendi e IVAFE Cassa (Quadri RM e RW):**
 ```bash
+uv run scripts/calcola_dividendi.py --csv activity-summary.csv --anno 2025
+```
+
+---
+
+### 🐍 Esecuzione classica con Python (Alternativa)
+Se non utilizzi `uv`, puoi procedere nel modo classico:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --index-url https://pypi.org/simple -r scripts/requirements.txt
+python scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --account-summary activity-summary.csv
 python scripts/calcola_dividendi.py --csv activity-summary.csv --anno 2025
 ```
 
