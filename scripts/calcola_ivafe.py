@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "pandas",
+#     "requests",
+#     "yfinance",
+#     "tabulate",
+# ]
+# ///
 """
 Calcolo IVAFE per Quadro RW - Dichiarazione dei redditi italiana.
 
@@ -167,6 +176,67 @@ def get_exchange_rate(target_date: date) -> float:
     )
     _exchange_rate_cache[cache_key] = rate
     return rate
+
+
+# ===================================================================
+# ESTRAZIONE CUTOFF DA ACCOUNT SUMMARY
+# ===================================================================
+
+def extract_cutoffs_from_summary(summary_path: str) -> list[date]:
+    """
+    Legge l'account summary e estrae le date dei 'Transfer out' o 'Sell' di azioni.
+    """
+    try:
+        df = pd.read_csv(summary_path, sep=None, engine='python', dtype=str)
+    except Exception as e:
+        logger.error("Errore nella lettura dell'account summary: %s", e)
+        return []
+
+    col_date = None
+    col_activity = None
+    col_shares = None
+    
+    for col in df.columns:
+        cleaned = col.strip().lower()
+        if cleaned == 'entry date':
+            col_date = col
+        elif cleaned == 'activity':
+            col_activity = col
+        elif cleaned == 'number of shares':
+            col_shares = col
+
+    if not (col_date and col_activity and col_shares):
+        # Tenta saltando la prima riga (caso report con intestazione)
+        try:
+            df = pd.read_csv(summary_path, sep=None, engine='python', dtype=str, skiprows=1)
+            for col in df.columns:
+                cleaned = col.strip().lower()
+                if cleaned == 'entry date':
+                    col_date = col
+                elif cleaned == 'activity':
+                    col_activity = col
+                elif cleaned == 'number of shares':
+                    col_shares = col
+        except Exception:
+            pass
+
+    if not (col_date and col_activity and col_shares):
+        logger.warning("Colonne necessarie non trovate in %s. Impossibile estrarre cutoff automaticamente.", summary_path)
+        return []
+
+    # Filtra per trasferimenti o vendite di azioni
+    valid_activities = ['transfer out', 'sell', 'sale']
+    df_transfers = df[df[col_activity].str.strip().str.lower().isin(valid_activities)].copy()
+    
+    # Converte le date
+    df_transfers['parsed_date'] = pd.to_datetime(
+        df_transfers[col_date].str.strip(), format="%d-%b-%Y", errors='coerce'
+    ).dt.date
+    
+    df_transfers = df_transfers.dropna(subset=['parsed_date'])
+    
+    cutoff_dates = sorted(list(df_transfers['parsed_date'].unique()))
+    return cutoff_dates
 
 
 # ===================================================================
@@ -548,6 +618,10 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--account-summary", default=None,
+        help="Percorso del file CSV dell'account summary (es. activity-summary.csv) per rilevare automaticamente i cutoff.",
+    )
+    parser.add_argument(
         "--ticker", default="GOOG",
         help="Ticker del titolo su Yahoo Finance (default: GOOG).",
     )
@@ -584,7 +658,21 @@ def main():
         logger.info("CSV input:     %s", csv_path)
         logger.info("Anno fiscale:  %d", args.anno)
         logger.info("Ticker:        %s", args.ticker)
-        logger.info("Cutoffs:       %s", [d.isoformat() for d in args.cutoff] if args.cutoff else "nessuno")
+        
+        # Gestione Cutoffs (Manuali + Automatici)
+        cutoffs = args.cutoff or []
+        if args.account_summary:
+            detected_cutoffs = extract_cutoffs_from_summary(args.account_summary)
+            if detected_cutoffs:
+                print(f"\n[i] Rilevati cutoff in {args.account_summary}:")
+                for d in detected_cutoffs:
+                    print(f"    - {d.isoformat()}")
+                cutoffs = sorted(list(set(cutoffs + detected_cutoffs)))
+            else:
+                print(f"\n[i] Nessun cutoff rilevato in {args.account_summary}")
+        
+        if args.cutoff:
+            print(f"[i] Cutoffs inseriti manualmente: {', '.join([d.isoformat() for d in args.cutoff])}")
         logger.info(
             "Anno bisestile: %s (%d giorni)",
             "Sì" if is_leap_year(args.anno) else "No",
@@ -600,7 +688,7 @@ def main():
             df,
             anno_fiscale=args.anno,
             ticker=args.ticker,
-            cutoffs=args.cutoff,
+            cutoffs=cutoffs,
         )
 
         if result.empty:
@@ -611,6 +699,8 @@ def main():
         print("\n")
         print("=" * 80)
         print(f"  QUADRO RW — IVAFE Anno Fiscale {args.anno}")
+        if cutoffs:
+            print(f"  Cutoffs applicati: {', '.join([d.isoformat() for d in cutoffs])}")
         print("=" * 80)
         print(
             tabulate(
