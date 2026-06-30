@@ -23,10 +23,29 @@ I file si trovano nella radice del repository:
 ### 1. Intervista Iniziale (Preparazione Dati)
 > [!IMPORTANT]
 > - Se l'utente non fornisce proattivamente l'anno fiscale o le date di cutoff nel prompt di invocazione, **devi richiederle esplicitamente**. **Non tentare di inferire** queste informazioni dal contesto o dai file.
-> - Se i file di input (`ss.csv` o `activity-summary.csv`) non sono presenti nel workspace, **chiedi all'utente di fornirli** e indirizzalo al file `README.md` per le istruzioni dettagliate su come scaricarli da Morgan Stanley.
+> - Se i file di input (`ss.csv` o `activity-summary.csv`) non sono presenti nel workspace, **guida l'utente passo-passo** nel recupero dei dati da Morgan Stanley mostrando le istruzioni specifiche riportate sotto.
 
-Prima di eseguire i calcoli, poni queste domande all'utente per raccogliere i parametri necessari:
+Prima di eseguire i calcoli, verifica la presenza dei file e raccogli i parametri necessari ponendo queste domande:
 
+#### Verifica File di Ingressi (se mancanti):
+Se uno o entrambi i file non sono presenti, mostra all'utente come scaricarli:
+
+*   **Per `ss.csv` (Calcolo Azioni/IVAFE):**
+    1. Accedi a **Morgan Stanley atWork**.
+    2. Vai su **Activity** > **Reports** > **Your Alphabet Stock Statement**.
+    3. Imposta: *Reporting Period* = `All available history`, *Currency* = `USD`, *Output Format* = `CSV`.
+    4. Clicca su **Run Report**, scarica il file e salvalo come `ss.csv` nel progetto.
+
+*   **Per `activity-summary.csv` (Calcolo Dividendi/Cash):**
+    1. Accedi a **Morgan Stanley atWork**.
+    2. Vai su **Activity** > **Reports** > **Account Summary**.
+    3. Imposta: *Period Quick Select* = `All Available History`, spunta sia *Share & Cash Holdings* che *Equity Awards*, *View As* = `Web Page`, *Account Summary Type* = `Full`.
+    4. Clicca su **Submit** e attendi la generazione.
+    5. Scorri fino in fondo (un trucco veloce è cercare "IRS Nonresident Alien Withholding").
+    6. Seleziona e copia tutta la tabella **Activity** (quella con colonne: *Entry Date, Activity, Type of Money, Cash, Number of Shares*, ecc.) partendo dall'intestazione fino alla fine.
+    7. Incolla i dati in Excel/Sheets, esportali in **CSV** e salvali come `activity-summary.csv` nel progetto.
+
+#### Domande per i Parametri:
 **Per le Azioni (IVAFE Stocks):**
 1.  **Anno Fiscale**: "Per quale anno dobbiamo calcolare l'IVAFE sulle azioni? (es. 2024)"
 2.  **Eventi di Liquidazione Totale (Cutoffs)**: "Durante l'anno (o in quelli passati), ci sono stati momenti in cui hai venduto o trasferito **tutte** le azioni presenti nel conto? Se sì, dimmi le date."
