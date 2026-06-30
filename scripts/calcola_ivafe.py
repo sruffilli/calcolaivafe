@@ -655,12 +655,15 @@ def main():
         if args.account_summary:
             detected_cutoffs = extract_cutoffs_from_summary(args.account_summary)
             if detected_cutoffs:
-                logger.info("Cutoffs rilevati automaticamente: %s", [d.isoformat() for d in detected_cutoffs])
+                print(f"\n[i] Rilevati cutoff in {args.account_summary}:")
+                for d in detected_cutoffs:
+                    print(f"    - {d.isoformat()}")
                 cutoffs = sorted(list(set(cutoffs + detected_cutoffs)))
             else:
-                logger.info("Nessun cutoff rilevato automaticamente.")
+                print(f"\n[i] Nessun cutoff rilevato in {args.account_summary}")
         
-        logger.info("Cutoffs utilizzati: %s", [d.isoformat() for d in cutoffs] if cutoffs else "nessuno")
+        if args.cutoff:
+            print(f"[i] Cutoffs inseriti manualmente: {', '.join([d.isoformat() for d in args.cutoff])}")
         logger.info(
             "Anno bisestile: %s (%d giorni)",
             "Sì" if is_leap_year(args.anno) else "No",
@@ -687,6 +690,8 @@ def main():
         print("\n")
         print("=" * 80)
         print(f"  QUADRO RW — IVAFE Anno Fiscale {args.anno}")
+        if cutoffs:
+            print(f"  Cutoffs applicati: {', '.join([d.isoformat() for d in cutoffs])}")
         print("=" * 80)
         print(
             tabulate(

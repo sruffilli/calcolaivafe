@@ -23,37 +23,43 @@ I file si trovano nella radice del repository:
 ### 1. Intervista Iniziale (Preparazione Dati)
 > [!IMPORTANT]
 > - Se l'utente non fornisce proattivamente l'anno fiscale o le date di cutoff nel prompt di invocazione, **devi richiederle esplicitamente**. **Non tentare di inferire** queste informazioni dal contesto o dai file.
-> - Se i file di input (`ss.csv` o `activity-summary.csv`) non sono presenti nel workspace, **guida l'utente passo-passo** nel recupero dei dati da Morgan Stanley mostrando le istruzioni specifiche riportate sotto.
+> - Segui il flusso decisionale sotto per determinare quali domande porre all'utente.
 
-Prima di eseguire i calcoli, verifica la presenza dei file e raccogli i parametri necessari ponendo queste domande:
+#### Flusso di Verifica e Intervista:
 
-#### Verifica File di Ingressi (se mancanti):
-Se uno o entrambi i file non sono presenti, mostra all'utente come scaricarli:
+1.  **Verifica la presenza di `ss.csv`**:
+    *   Se **manca**, mostra le istruzioni per scaricarlo (Vedi *Istruzioni ss.csv* sotto) e attendi che l'utente lo carichi.
 
-*   **Per `ss.csv` (Calcolo Azioni/IVAFE):**
+2.  **Verifica la presenza di `activity-summary.csv`**:
+    *   Se **è presente**:
+        *   Informa l'utente che le date di cutoff (trasferimenti) verranno rilevate automaticamente da questo file.
+        *   Chiedi solo: *"Vuoi aggiungere manualmente altre date di cutoff oltre a quelle che rileverò dal conto?"*
+    *   Se **manca**:
+        *   Spiega all'utente che può caricare `activity-summary.csv` per rilevare i cutoff in automatico (mostra *Istruzioni activity-summary.csv*).
+        *   Se l'utente preferisce non caricarlo, **devi chiedere manualmente**:
+            1. *"Ci sono stati momenti in cui hai venduto o trasferito tutte le azioni dal conto? Se sì, indicami le date (cutoff)."*
+            2. *"Il file delle azioni contiene una colonna 'Sale Date' per le vendite singole?"*
+
+3.  **Raccogli i parametri comuns**:
+    *   Chiedi sempre l'**Anno Fiscale** di riferimento se non specificato.
+    *   Per il calcolo dei dividendi (se richiesto e se `activity-summary.csv` è presente), chiedi: *"Ci sono state date in cui il conto cash è stato svuotato o azzerato?"*
+
+---
+
+#### Istruzioni di Download (da mostrare solo se i file mancano):
+
+*   **Istruzioni `ss.csv` (Azioni):**
     1. Accedi a **Morgan Stanley atWork**.
-    2. Vai su **Activity** > **Reports** > **Your Alphabet Stock Statement**.
+    2. Clicca su **Activity** > **Reports** > **Your Alphabet Stock Statement**.
     3. Imposta: *Reporting Period* = `All available history`, *Currency* = `USD`, *Output Format* = `CSV`.
-    4. Clicca su **Run Report**, scarica il file e salvalo come `ss.csv` nel progetto.
+    4. Scarica e salva come `ss.csv` nella radice del progetto.
 
-*   **Per `activity-summary.csv` (Calcolo Dividendi/Cash):**
+*   **Istruzioni `activity-summary.csv` (Dividendi/Cash/Cutoff):**
     1. Accedi a **Morgan Stanley atWork**.
     2. Vai su **Activity** > **Reports** > **Account Summary**.
-    3. Imposta: *Period Quick Select* = `All Available History`, spunta sia *Share & Cash Holdings* che *Equity Awards*, *View As* = `Web Page`, *Account Summary Type* = `Full`.
-    4. Clicca su **Submit** e attendi la generazione.
-    5. Scorri fino in fondo (un trucco veloce è cercare "IRS Nonresident Alien Withholding").
-    6. Seleziona e copia tutta la tabella **Activity** (quella con colonne: *Entry Date, Activity, Type of Money, Cash, Number of Shares*, ecc.) partendo dall'intestazione fino alla fine.
-    7. Incolla i dati in Excel/Sheets, esportali in **CSV** e salvali come `activity-summary.csv` nel progetto.
-
-#### Domande per i Parametri:
-**Per le Azioni (IVAFE Stocks):**
-1.  **Anno Fiscale**: "Per quale anno dobbiamo calcolare l'IVAFE sulle azioni? (es. 2024)"
-2.  **Eventi di Liquidazione Totale (Cutoffs)**: "Durante l'anno (o in quelli passati), ci sono stati momenti in cui hai venduto o trasferito **tutte** le azioni presenti nel conto? Se sì, dimmi le date."
-3.  **Vendite Singole**: "Hai effettuato vendite di singoli blocchi? In tal caso, assicurati che il CSV contenga la colonna 'Sale Date' (o 'Data Vendita')."
-
-**Per i Dividendi e Cash (Quadro RM e IVAFE Cash):**
-4.  **File Estratto Conto**: "Assicurati di avere il file completo `activity-summary.csv`."
-5.  **Date di Cutover Cash**: "Ci sono state date in cui il conto cash (dove si accumulano i dividendi) è stato svuotato o azzerato?"
+    3. Imposta: *Period* = `All Available History`, spunta *Share & Cash Holdings* e *Equity Awards*, *View As* = `Web Page`, *Type* = `Full`.
+    4. Clicca su **Submit**. Scorri in fondo, cerca "IRS Nonresident Alien Withholding".
+    5. Copia la tabella **Activity** (dall'intestazione alla fine), incollala in Excel/Sheets ed esportala come `activity-summary.csv` nella radice del progetto.
 
 ### 2. Funzionamento di Cutoffs e Sale Date (Spiegazione all'Utente)
 Spiega all'utente come lo script userà le date fornite:
