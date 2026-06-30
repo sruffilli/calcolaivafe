@@ -53,11 +53,12 @@ uv pip install -r scripts/requirements.txt
 
 ### 1. Calcolo IVAFE Azioni (Quadro RW)
 ```bash
-python scripts/calcola_ivafe.py --csv ss.csv --anno 2025
+python scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --account-summary activity-summary.csv
 ```
-*   **Cutoff (Liquidazioni Totali)**: Se hai azzerato il portafoglio in certe date:
+*   **Rilevamento Automatico dei Cutoff**: Passando `--account-summary`, lo script rileverà automaticamente le date di trasferimento delle azioni (attività `Transfer out`) e le userà come cutoff.
+*   **Cutoff Manuali (Opzionale)**: Puoi comunque forzare ulteriori date di cutoff manualmente:
     ```bash
-    python scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --cutoff 2024-11-24 2025-06-30
+    python scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --account-summary activity-summary.csv --cutoff 2025-11-20
     ```
 
 ### 2. Calcolo Dividendi e IVAFE Cassa (Quadri RM e RW)

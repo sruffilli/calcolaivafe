@@ -76,7 +76,7 @@ uv pip install -r scripts/requirements.txt
 
 **Esecuzione Calcolo Stock:**
 ```bash
-python scripts/calcola_ivafe.py --csv report_azioni.csv --anno 2024 --cutoff 2023-12-31 2024-06-15
+python scripts/calcola_ivafe.py --csv report_azioni.csv --anno 2024 --account-summary account-summary.csv
 ```
 
 **Esecuzione Calcolo Dividendi e IVAFE Cash:**
