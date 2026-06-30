@@ -30,19 +30,17 @@ I file si trovano nella radice del repository:
 1.  **Verifica la presenza di `ss.csv`**:
     *   Se **manca**, mostra le istruzioni per scaricarlo (Vedi *Istruzioni ss.csv* sotto) e attendi che l'utente lo carichi.
 
-2.  **Verifica la presenza di `activity-summary.csv`**:
+2.  **Verifica la presenza di `activity-summary.csv` (o `account-summary.csv`)**:
     *   Se **è presente**:
-        *   Informa l'utente che le date di cutoff (trasferimenti) verranno rilevate automaticamente da questo file.
-        *   Chiedi solo: *"Vuoi aggiungere manualmente altre date di cutoff oltre a quelle che rileverò dal conto?"*
+        *   **Non chiedere** date di cutoff (né per le azioni né per il cash). Procedi direttamente rilevandole automaticamente dal file.
     *   Se **manca**:
         *   Spiega all'utente che può caricare `activity-summary.csv` per rilevare i cutoff in automatico (mostra *Istruzioni activity-summary.csv*).
         *   Se l'utente preferisce non caricarlo, **devi chiedere manualmente**:
             1. *"Ci sono stati momenti in cui hai venduto o trasferito tutte le azioni dal conto? Se sì, indicami le date (cutoff)."*
             2. *"Il file delle azioni contiene una colonna 'Sale Date' per le vendite singole?"*
 
-3.  **Raccogli i parametri comuns**:
+3.  **Raccogli i parametri comuni**:
     *   Chiedi sempre l'**Anno Fiscale** di riferimento se non specificato.
-    *   Per il calcolo dei dividendi (se richiesto e se `activity-summary.csv` è presente), chiedi: *"Ci sono state date in cui il conto cash è stato svuotato o azzerato?"*
 
 ---
 
@@ -84,5 +82,9 @@ uv run scripts/calcola_dividendi.py --csv account-summary.csv --anno 2024 --cuto
 
 *(In caso di fallback senza `uv`, crea un virtual environment, installa da `scripts/requirements.txt` ed esegui con `python`)*
 
-## Risultati
-Gli script generano tabelle testuali e file CSV (`quadro_rw_...csv` e `quadro_rm_...csv`). Verifica con l'utente se i risultati riflettono la sua situazione reale prima di considerare il compito concluso.
+## Risultati e Output
+Gli script generano tabelle testuali e file CSV (`quadro_rw_...csv` e `quadro_rm_...csv`).
+
+**Obbligo dell'Agente nel presentare i risultati:**
+- **Mostra esplicitamente le date di cutoff rilevate e rilevanti** per il calcolo (es. l'ultimo cutoff prima dell'anno fiscale e quelli avvenuti durante l'anno).
+- Verifica con l'utente se i risultati riflettono la sua situazione reale prima di considerare il compito concluso.
