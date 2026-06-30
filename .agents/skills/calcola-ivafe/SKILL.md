@@ -15,8 +15,8 @@ I file si trovano nella radice del repository:
 - `scripts/requirements.txt`: Dipendenze (pandas, yfinance, requests, tabulate).
 
 ## Documentazione di Riferimento
-- [IVAFE.md](file:///Users/sruffilli/git/calcolaivafe/references/IVAFE.md): Report sull'architettura normativa dell'IVAFE.
-- [DIVIDENDI.md](file:///Users/sruffilli/git/calcolaivafe/references/DIVIDENDI.md): Guida al calcolo dei dividendi esteri (Netto Frontiera).
+- [IVAFE.md](../../../references/IVAFE.md): Report sull'architettura normativa dell'IVAFE.
+- [DIVIDENDI.md](../../../references/DIVIDENDI.md): Guida al calcolo dei dividendi esteri (Netto Frontiera).
 
 ## Flusso Operativo (Mandatorio)
 

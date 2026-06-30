@@ -99,8 +99,8 @@ Puoi usare questi script con qualsiasi altro LLM (es. caricando i file in un "Pr
 
 ## Riferimenti Normativi
 I dettagli sul calcolo e le circolari dell'Agenzia delle Entrate sono documentati in:
-- [IVAFE.md](file:///Users/sruffilli/git/calcolaivafe/references/IVAFE.md)
-- [DIVIDENDI.md](file:///Users/sruffilli/git/calcolaivafe/references/DIVIDENDI.md)
+- [IVAFE.md](references/IVAFE.md)
+- [DIVIDENDI.md](references/DIVIDENDI.md)
 
 ## Disclaimer
 Questo strumento è un ausilio al calcolo e non sostituisce il parere di un consulente fiscale.
