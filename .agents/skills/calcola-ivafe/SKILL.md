@@ -9,14 +9,14 @@ Questa skill automatizza il calcolo dell'imposta IVAFE italiana e la generazione
 
 ## Struttura della Skill
 
-I file della skill si trovano in `.gemini/skills/calcola-ivafe/scripts/`:
-- `calcola_ivafe.py`: Lo script per il calcolo dell'IVAFE su azioni (GSUs).
-- `calcola_dividendi.py`: Lo script per il calcolo delle tasse sui dividendi (Quadro RM) e IVAFE su cash (Quadro RW).
-- `requirements.txt`: Dipendenze (pandas, yfinance, requests, tabulate).
+I file si trovano nella radice del repository:
+- `scripts/calcola_ivafe.py`: Lo script per il calcolo dell'IVAFE su azioni (GSUs).
+- `scripts/calcola_dividendi.py`: Lo script per il calcolo delle tasse sui dividendi (Quadro RM) e IVAFE su cash (Quadro RW).
+- `scripts/requirements.txt`: Dipendenze (pandas, yfinance, requests, tabulate).
 
 ## Documentazione di Riferimento
-- [IVAFE.md](file:///Users/sruffilli/git/calcolaivafe/.gemini/skills/calcola-ivafe/references/IVAFE.md): Report sull'architettura normativa dell'IVAFE.
-- [DIVIDENDI.md](file:///Users/sruffilli/git/calcolaivafe/.gemini/skills/calcola-ivafe/references/DIVIDENDI.md): Guida al calcolo dei dividendi esteri (Netto Frontiera).
+- [IVAFE.md](file:///Users/sruffilli/git/calcolaivafe/references/IVAFE.md): Report sull'architettura normativa dell'IVAFE.
+- [DIVIDENDI.md](file:///Users/sruffilli/git/calcolaivafe/references/DIVIDENDI.md): Guida al calcolo dei dividendi esteri (Netto Frontiera).
 
 ## Flusso Operativo (Mandatorio)
 
@@ -48,21 +48,21 @@ Configura l'ambiente e lancia gli script appropriati:
 # Crea il venv solo se non esiste
 [ -d .venv ] || uv venv .venv
 source .venv/bin/activate
-uv pip install -r .gemini/skills/calcola-ivafe/scripts/requirements.txt
+uv pip install -r scripts/requirements.txt
 ```
 
 > [!TIP]
 > Se riscontri errori di autenticazione (401) durante l'installazione, prova a forzare l'indice pubblico:
-> `uv pip install --index-url https://pypi.org/simple -r .gemini/skills/calcola-ivafe/scripts/requirements.txt`
+> `uv pip install --index-url https://pypi.org/simple -r scripts/requirements.txt`
 
 **Esecuzione Calcolo Stock:**
 ```bash
-python .gemini/skills/calcola-ivafe/scripts/calcola_ivafe.py --csv report_azioni.csv --anno 2024 --cutoff 2023-12-31 2024-06-15
+python scripts/calcola_ivafe.py --csv report_azioni.csv --anno 2024 --cutoff 2023-12-31 2024-06-15
 ```
 
 **Esecuzione Calcolo Dividendi e IVAFE Cash:**
 ```bash
-python .gemini/skills/calcola-ivafe/scripts/calcola_dividendi.py --csv account-summary.csv --anno 2024 --cutoff 2024-10-01
+python scripts/calcola_dividendi.py --csv account-summary.csv --anno 2024 --cutoff 2024-10-01
 ```
 
 ## Risultati

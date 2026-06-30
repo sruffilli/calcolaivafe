@@ -1,133 +1,98 @@
-# Calcola IVAFE — Skill per Gemini (Quadro RW e RM)
+# Calcola IVAFE (Quadro RW e RM)
 
-Questo repository contiene **una Skill per Gemini** (disponibile nella cartella `.gemini/skills/calcola-ivafe/`). Consente a un assistente AI abilitato di guidarti ed eseguire automaticamente il calcolo dell'imposta **IVAFE** (Azioni e Liquidità) e dei dividendi esteri, generando le righe per i quadri **RW** e **RM** della dichiarazione dei redditi italiana.
+Questo repository contiene strumenti in Python per il calcolo dell'imposta **IVAFE** (Azioni e Liquidità) e dei dividendi esteri, generando le righe per i quadri **RW** e **RM** della dichiarazione dei redditi italiana.
 
-Progettato specificamente per la gestione di **Google GSUs** (Alphabet Inc.) e conti Morgan Stanley, ma estensibile a qualsiasi titolo estero tracciabile su Yahoo Finance.
-
-## 🤖 Come usare la Skill con Gemini (Metodo Principale)
-
-Se stai usando un ambiente compatibile con le skill di Gemini (come questo), puoi invocare la skill semplicemente chiedendo all'assistente di eseguire il calcolo.
-
-**Esempio di invocazione:**
-- *"Calcola le tasse per l'anno 2025"*
-- *"Usa la skill `calcola-ivafe` per calcolare i quadri RW e RM per l'anno 2025, con una data di cutoff per le azioni del 2025-11-20"*
-
-L'assistente leggerà le istruzioni in `SKILL.md` e ti guiderà passo passo, chiedendoti i parametri necessari e i file di input. Se non sai come ottenere i file da Morgan Stanley, consulta la sezione successiva.
-
-## 📈 Caratteristiche Principali
-
-- 📊 **Integrazione API**: Recupero automatico dei prezzi storici tramite `yfinance` e dei tassi di cambio ufficiali (USD/EUR) tramite le API di **Banca d'Italia**.
-- 🔄 **Rolling Cutoff Strategy**: Supporto per la gestione di liquidazioni totali in date multiple.
-- 📂 **Parsing Dinamico**: Supporta il formato CSV di Morgan Stanley e vendite singole.
-- 📋 **Quadro RW e RM Ready**: Genera file CSV aggregati per i quadri RW (Azioni e Cash) e RM (Dividendi).
-- 💰 **Dividendi e Cash**: Calcolo del "Netto Frontiera" e della giacenza media della liquidità.
-- ⚡ **Cache In-Memory**: Ottimizzato per evitare chiamate API ridondanti.
+Progettato originariamente per la gestione di **Google GSUs** (Alphabet Inc.) e conti Morgan Stanley, ma estensibile a qualsiasi titolo estero tracciabile su Yahoo Finance.
 
 ---
 
 ## 📂 Preparazione Dati: Scaricare i file da Morgan Stanley
 
-Lo strumento richiede due file diversi a seconda del calcolo da effettuare. **Nota: Il recupero di questi file è un passo preliminare obbligatorio sia per l'utilizzo tramite Skill Gemini che per l'uso manuale degli script.**
+Lo strumento richiede due file diversi a seconda del calcolo da effettuare.
 
-#### 1. File per Azioni (ss.csv)
-Per lo script `calcola_ivafe.py`:
-1. Accedi a **Morgan Stanley atWork** (es. tramite il link `go/mssb` se disponibile, o direttamente su `https://atwork.morganstanley.com`).
+### 1. File per Azioni (`ss.csv`)
+Per il calcolo IVAFE sulle azioni:
+1. Accedi a **Morgan Stanley atWork**.
 2. Nel menu superiore, clicca su **Activity** > **Reports** > **Your Alphabet Stock Statement**.
 3. Imposta:
    - **Reporting Period**: `All available history`.
    - **Choose a currency**: `USD`.
    - **Output Format**: `CSV`.
 4. Clicca su **Run Report**.
-5. Scarica il file tramite il link `"Please click here to download"` e rinominalo in `ss.csv`.
+5. Scarica il file e rinominalo in `ss.csv` nella radice del progetto.
 
-#### 2. File per Dividendi e Cash (activity-summary.csv)
-Per lo script `calcola_dividendi.py`:
+### 2. File per Dividendi e Cash (`activity-summary.csv`)
+Per il calcolo di dividendi e liquidità:
 1. Accedi a **Morgan Stanley atWork**.
-2. Nel menu superiore, naviga su **Activity** > **Reports** > **Account Summary**.
-3. Nella pagina di configurazione, imposta:
-   - **Period Quick Select**: `All Available History` (o seleziona il periodo desiderato).
+2. Naviga su **Activity** > **Reports** > **Account Summary**.
+3. Imposta:
+   - **Period Quick Select**: `All Available History`.
    - **Product Selection**: Spunta sia `Share & Cash Holdings` che `Equity Awards`.
-   - **View As**: Seleziona `Web Page`.
-   - **Account Summary Type**: Seleziona `Full`.
-4. Clicca su **Submit** e attendi la generazione (può richiedere un minuto).
-5. Scorri fino in fondo alla pagina (un trucco veloce è cercare con CTRL+F la stringa `"IRS Nonresident Alien Withholding"`).
-6. Seleziona e copia tutta la tabella intitolata **Activity** (quella con colonne: *Entry Date, Activity, Type of Money, Cash, Number of Shares*, ecc.) partendo dalla riga di intestazione fino alla fine.
-7. Incolla i dati in un foglio di calcolo (es. Google Sheets).
-8. Esporta il foglio in formato **CSV** e salvalo come `activity-summary.csv` nella cartella del progetto.
+   - **View As**: `Web Page`.
+   - **Account Summary Type**: `Full`.
+4. Clicca su **Submit**.
+5. Scorri fino in fondo alla tabella **Activity** (Entry Date, Activity, ecc.).
+6. Copia i dati, incollali in un foglio di calcolo ed esporta in CSV come `activity-summary.csv` nella radice del progetto.
 
 ---
 
-## 🐍 Utilizzo alternativo tramite Script Python (Opzionale)
+## 💻 Utilizzo tramite CLI (Agent-Agnostic)
 
-Se preferisci eseguire i calcoli manualmente senza l'ausilio dell'AI, puoi utilizzare direttamente gli script Python presenti nel repository.
+Puoi eseguire i calcoli manualmente sul tuo computer.
 
-### Requisiti per uso manuale
+### Requisiti
 - Python 3.10+
-- [uv](https://github.com/astral-sh/uv) (consigliato)
+- [uv](https://github.com/astral-sh/uv) (consigliato per la gestione rapida delle dipendenze)
 
 ### Configurazione Ambiente
 ```bash
 uv venv
 source .venv/bin/activate
-uv pip install -r .gemini/skills/calcola-ivafe/scripts/requirements.txt
+uv pip install -r scripts/requirements.txt
 ```
-
-
 
 ### 1. Calcolo IVAFE Azioni (Quadro RW)
-
-Il comando base richiede il file CSV delle azioni e l'anno fiscale:
-
 ```bash
-python .gemini/skills/calcola-ivafe/scripts/calcola_ivafe.py --csv ss.csv --anno 2025
+python scripts/calcola_ivafe.py --csv ss.csv --anno 2025
 ```
-
-#### Funzionalità Avanzate
-
-**Rolling Cutoffs (Liquidazioni Totali)**
-Se durante l'anno (o in quelli passati) hai venduto o trasferito **tutte** le azioni presenti nel conto, puoi usare il parametro `--cutoff`. Lo script supporta date multiple.
-
-```bash
-python .gemini/skills/calcola-ivafe/scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --cutoff 2024-11-24 2025-06-30
-```
-
-**Colonna 'Sale Date' (Vendite Singole)**
-Se il tuo file include una colonna intitolata `Sale Date` o `Data Vendita`, lo script userà quella data come termine del possesso.
+*   **Cutoff (Liquidazioni Totali)**: Se hai azzerato il portafoglio in certe date:
+    ```bash
+    python scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --cutoff 2024-11-24 2025-06-30
+    ```
 
 ### 2. Calcolo Dividendi e IVAFE Cassa (Quadri RM e RW)
-
-Il comando richiede il file riepilogativo del conto (`activity-summary.csv`) e l'anno fiscale:
-
 ```bash
-python .gemini/skills/calcola-ivafe/scripts/calcola_dividendi.py --csv activity-summary.csv --anno 2025
+python scripts/calcola_dividendi.py --csv activity-summary.csv --anno 2025
 ```
 
-### Parametri Comuni e Specifici
-- `--csv`: Percorso del file estratto conto (CSV o TSV).
-- `--anno`: Anno fiscale di riferimento (default: anno precedente).
-- `--cutoff`: 
-  - Per `calcola_ivafe.py`: Una o più date di liquidazione totale.
-  - Per `calcola_dividendi.py`: Data di azzeramento del conto cash.
-- `--ticker`: (Solo per `calcola_ivafe.py`) Ticker Yahoo Finance (default: `GOOG`).
+---
 
-## Riferimenti Normativi e Razionale di Calcolo
+## 🤖 Utilizzo con Agenti AI
 
-Il calcolo dell'IVAFE implementato in questo script segue le direttive dell'Agenzia delle Entrate e le istruzioni del Quadro RW:
+### Con Antigravity (o `antigravity-cli`)
+Questo repository è configurato come una **Skill locale** per Antigravity. 
+Se usi `antigravity-cli` in questa cartella, l'agente rileverà automaticamente la skill.
 
-### Riferimenti Normativi
-- **Circolare n. 28/E del 2 luglio 2012**: Linee guida generali per l'applicazione dell'IVAFE.
-- **Circolare n. 10/E del 14 maggio 2014 (Quesito 13.4)**: Specifica che per le attività finanziarie detenute alla data del 1° gennaio si deve utilizzare il cambio medio del mese di dicembre dell'anno precedente.
-- **Istruzioni Modello Redditi (Quadro RW)**: Disciplinano la valorizzazione delle attività al valore di mercato (codice 1) e indicano di utilizzare il valore al primo giorno di detenzione per i nuovi acquisti.
-- **[DIVIDENDI.md](file:///Users/sruffilli/git/calcolaivafe/.gemini/skills/calcola-ivafe/references/DIVIDENDI.md)**: Documentazione specifica per il calcolo dei dividendi esteri (Netto Frontiera) e Quadro RM.
+**Esempi di comandi:**
+- `@antigravity calcola le tasse per l'anno 2025`
+- `@antigravity esegui calcola-ivafe per il 2025 con cutoff 2025-11-20`
 
-### Razionale di Calcolo
-- **Valore Iniziale**: Per le azioni già possedute al 1° gennaio, viene calcolato usando il prezzo a inizio anno e il tasso di cambio medio di dicembre dell'anno precedente. Per le azioni maturate in corso d'anno (vesting), si usa il valore alla data di maturazione.
-- **Valore Finale**: Calcolato al 31 dicembre o alla data di vendita, usando il tasso di cambio medio del mese di riferimento.
-- **Proporzionalità**: L'imposta è calcolata pro-rata sui giorni di effettivo possesso. Come da esempi delle istruzioni ministeriali, il denominatore è fissato a **365** giorni anche per gli anni bisestili.
-- **Aliquota**: Fissata allo **0.2%** (2 per mille) per i titoli detenuti in paesi White List (come gli USA per le azioni Alphabet).
+L'agente leggerà le istruzioni in `.agents/skills/calcola-ivafe/SKILL.md`, ti guiderà nell'intervista iniziale e lancerà gli script per te.
 
-## Privacy
-Lo script è configurato per ignorare i file `*.csv` tramite `.gitignore`. Viene fornito un file `ss.csv.sample` come riferimento per la struttura dei dati.
+### Con altri Agenti (ChatGPT, Claude, ecc.)
+Puoi usare questi script con qualsiasi altro LLM (es. caricando i file in un "Project" di Claude o in una chat di ChatGPT Plus):
+1.  Carica i file `scripts/calcola_ivafe.py` e `scripts/calcola_dividendi.py`.
+2.  Carica i tuoi file di dati (`ss.csv` e/o `activity-summary.csv`).
+3.  Carica i file in `references/` per dare all'agente il contesto normativo italiano.
+4.  Usa un prompt del tipo:
+    > *"Usa gli script python forniti per calcolare l'IVAFE/dividendi per l'anno [ANNO]. I miei dati sono in [FILE]. Se hai bisogno di chiarimenti su date di cutoff o vendite, chiedimi prima di procedere."*
+
+---
+
+## Riferimenti Normativi
+I dettagli sul calcolo e le circolari dell'Agenzia delle Entrate sono documentati in:
+- [IVAFE.md](file:///Users/sruffilli/git/calcolaivafe/references/IVAFE.md)
+- [DIVIDENDI.md](file:///Users/sruffilli/git/calcolaivafe/references/DIVIDENDI.md)
 
 ## Disclaimer
-Questo strumento è un ausilio al calcolo e non sostituisce il parere di un consulente fiscale professionista. L'autore non si assume responsabilità per eventuali errori nei dati forniti dalle API esterne o per l'uso improprio dei risultati.
+Questo strumento è un ausilio al calcolo e non sostituisce il parere di un consulente fiscale.
