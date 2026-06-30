@@ -21,8 +21,10 @@ Per il calcolo IVAFE sulle azioni:
 4. Clicca su **Run Report**.
 5. Scarica il file e rinominalo in `ss.csv` nella radice del progetto.
 
-### 2. File per Dividendi e Cash (`activity-summary.csv`)
+### 2. File per Dividendi e Cash (`activity-summary.csv` o `account-summary.csv`)
 Per il calcolo di dividendi e liquidità:
+
+#### Opzione A: Tramite HTML e Parser (Raccomandato, evita il copia/incolla)
 1. Accedi a **Morgan Stanley atWork**.
 2. Naviga su **Activity** > **Reports** > **Account Summary**.
 3. Imposta:
@@ -30,9 +32,21 @@ Per il calcolo di dividendi e liquidità:
    - **Product Selection**: Spunta sia `Share & Cash Holdings` che `Equity Awards`.
    - **View As**: `Web Page`.
    - **Account Summary Type**: `Full`.
-4. Clicca su **Submit**.
-5. Scorri fino in fondo alla tabella **Activity** (Entry Date, Activity, ecc.).
-6. Copia i dati, incollali in un foglio di calcolo ed esporta in CSV come `activity-summary.csv` nella radice del progetto.
+4. **Prima di cliccare su Submit**, apri i *Developer Tools* del browser (F12) e vai sulla tab *Network*.
+5. Clicca su **Submit**.
+6. Nella tab *Network*, individua la richiesta a `userStatement.do`.
+7. Fai click con il tasto destro sulla richiesta e seleziona **Copy** > **Copy as cURL**.
+8. Esegui il comando nel terminale salvando l'output su file (es. aggiungendo `-o account-summary.html` alla fine).
+9. Converti l'HTML in CSV usando lo script di utility:
+   ```bash
+   uv run scripts/parse_html_summary.py --html account-summary.html --output activity-summary.csv
+   ```
+
+#### Opzione B: Copia e Incolla Manuale
+1. Esegui i passaggi da 1 a 4 dell'Opzione A (senza aprire i DevTools).
+2. Clicca su **Submit**.
+3. Scorri fino in fondo alla tabella **Activity** (Entry Date, Activity, ecc.) nella pagina generata.
+4. Copia i dati, incollali in un foglio di calcolo ed esporta in CSV come `activity-summary.csv` nella radice del progetto.
 
 ---
 

@@ -12,6 +12,7 @@ Questa skill automatizza il calcolo dell'imposta IVAFE italiana e la generazione
 I file si trovano nella radice del repository:
 - `scripts/calcola_ivafe.py`: Lo script per il calcolo dell'IVAFE su azioni (GSUs).
 - `scripts/calcola_dividendi.py`: Lo script per il calcolo delle tasse sui dividendi (Quadro RM) e IVAFE su cash (Quadro RW).
+- `scripts/parse_html_summary.py`: Utility per convertire l'HTML dell'Account Summary in CSV.
 - `scripts/requirements.txt`: Dipendenze (pandas, yfinance, requests, tabulate).
 
 ## Documentazione di Riferimento
@@ -58,6 +59,18 @@ I file si trovano nella radice del repository:
     3. Imposta: *Period* = `All Available History`, spunta *Share & Cash Holdings* e *Equity Awards*, *View As* = `Web Page`, *Type* = `Full`.
     4. Clicca su **Submit**. Scorri in fondo, cerca "IRS Nonresident Alien Withholding".
     5. Copia la tabella **Activity** (dall'intestazione alla fine), incollala in Excel/Sheets ed esportala come `activity-summary.csv` nella radice del progetto.
+
+*   **Metodo Alternativo via HTML (Consigliato, evita il copia/incolla):**
+    1. Esegui i passaggi da 1 a 3 delle istruzioni per `activity-summary.csv` (impostazione filtri).
+    2. **Prima di cliccare su Submit**, apri i *Developer Tools* (F12) e vai sulla tab *Network*.
+    3. Clicca su **Submit**.
+    4. Nella tab *Network*, individua la richiesta a `userStatement.do` (avvenuta al click di Submit).
+    5. Fai click con il tasto destro sulla richiesta e seleziona **Copy** > **Copy as cURL**.
+    6. Esegui il comando nel terminale salvando l'output su file (es. aggiungendo `-o account-summary.html` alla fine).
+    7. Converti l'HTML in CSV con il parser:
+       ```bash
+       .venv/bin/python scripts/parse_html_summary.py --html account-summary.html --output account-summary.csv
+       ```
 
 ### 2. Funzionamento di Cutoffs e Sale Date (Spiegazione all'Utente)
 Spiega all'utente come lo script userà le date fornite:
