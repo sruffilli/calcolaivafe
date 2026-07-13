@@ -26,15 +26,24 @@ I principi cardine stabiliti sono:
 - **Imposta Italiana (26% su € 850)**: € 221,00
 - Netto Finale per l'Investitore: € 629,00 (invece di € 590,00 calcolati sul lordo).
 
-## 3. Mappatura per la Compilazione del Quadro RM
-I proventi vanno indicati nel **Fascicolo 2** del Modello Redditi PF, specificamente nella **Sezione V del Quadro RM**:
+## 3. Mappatura per la Compilazione
+A seconda della dichiarazione utilizzata, i proventi vanno dichiarati nel Quadro RM (Modello Redditi) o nel Quadro M (Modello 730).
 
-- **Tipo di Reddito**: Codice identificativo per i dividendi esteri.
+### A) Modello Redditi PF — Sezione V del Quadro RM
+- **Tipo di Reddito**: Codice identificativo per i dividendi esteri (es. `H` o `I` a seconda del caso).
 - **Base Imponibile**: Inserire il valore del **Netto Frontiera** (importo accreditato).
 - **Aliquota**: 26%.
 
-*Nota sulle Minusvalenze:* La tassazione nel Quadro RM è una tassazione isolata. I redditi di capitale **non ammettono** la compensazione con minusvalenze finanziarie (che appartengono ai redditi diversi del Quadro RT).
+### B) Modello 730 — Rigo M31 del Quadro M (Precompilata)
+Nel 730 precompilato, i dividendi esteri confluiscono nel Quadro M, rigo M31:
+- **Colonna 1 (Tipo)**: `H` (Utili e altri proventi da partecipazioni estere).
+- **Colonna 2 (Codice Stato estero)**: `069` (Stati Uniti).
+- **Colonna 3 (Ammontare reddito)**: Inserire l'importo del **Netto Frontiera** convertito in Euro (al netto delle ritenute estere del 15%).
+- **Colonna 4 (Aliquota %)**: `26` (%).
+- *Nota*: L'imposta sostitutiva del 26% viene calcolata automaticamente dal software 730 nel riepilogo `730-3`.
 
-## 4. Rapporto con altri Quadri (RT e RW)
-- **Quadro RT (Plusvalenze)**: **NON serve** in questo scenario. Il Quadro RT si applica solo alle plusvalenze/minusvalenze da compravendita (capital gains), non alla percezione di dividendi.
-- **Quadro RW (IVAFE)**: L'IVAFE si applica al valore patrimoniale dell'asset (le azioni possedute) ed è calcolata nel Quadro RW. Il dividendo in sé è un reddito e va nel Quadro RM. Se i dividendi accumulati sul conto estero superano le soglie previste (es. giacenza media > 5.000€), il conto stesso potrebbe essere soggetto a IVAFE fissa (34,20€).
+*Nota sulle Minusvalenze:* La tassazione dei dividendi è isolata. I redditi di capitale **non ammettono** la compensazione con minusvalenze finanziarie (le quali appartengono ai redditi diversi del Quadro RT/T).
+
+## 4. Rapporto con altri Quadri (RT/T e RW/W)
+- **Quadro RT / Quadro T (Plusvalenze)**: Si applicano alle plusvalenze/minusvalenze da compravendita (capital gains), non alla percezione di dividendi.
+- **Quadro RW / Quadro W (IVAFE)**: L'IVAFE si applica al valore patrimoniale dell'asset (le azioni possedute). Il dividendo in sé è un reddito. Se i dividendi rimangono sul conto estero, concorrono alla giacenza media per la verifica del superamento dei 5.000€ (IVAFE sul cash).

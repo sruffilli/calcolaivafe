@@ -3,21 +3,27 @@ name: calcola-ivafe
 description: Skill per calcolare l'IVAFE per le stock, le imposte sui dividendi (Quadro RM) e l'IVAFE sulla liquidità accumulata (Quadro RW).
 ---
 
-# Calcolo Fiscale Esteri (Quadro RW e RM) - Skill Locale
+# Calcolo Fiscale Esteri (Quadro W/RW e M/RM) - Skill Locale
 
-Questa skill automatizza il calcolo dell'imposta IVAFE italiana e la generazione delle righe per il Quadro RW e RM partendo da estratti conto di broker esteri.
+Questa skill automatizza il calcolo dell'imposta IVAFE italiana e la generazione delle righe per la dichiarazione dei redditi (Modello 730 o Modello Redditi PF) partendo da estratti conto di broker esteri.
 
 ## Struttura della Skill
 
 I file si trovano nella radice del repository:
 - `scripts/calcola_ivafe.py`: Lo script per il calcolo dell'IVAFE su azioni (GSUs).
-- `scripts/calcola_dividendi.py`: Lo script per il calcolo delle tasse sui dividendi (Quadro RM) e IVAFE su cash (Quadro RW).
+- `scripts/calcola_dividendi.py`: Lo script per il calcolo delle tasse sui dividendi (Quadro RM/M) e IVAFE su cash (Quadro RW/W).
 - `scripts/parse_html_summary.py`: Utility per convertire l'HTML dell'Account Summary in CSV.
 - `scripts/requirements.txt`: Dipendenze (pandas, yfinance, requests, tabulate).
 
 ## Documentazione di Riferimento
 - [IVAFE.md](../../../references/IVAFE.md): Report sull'architettura normativa dell'IVAFE.
 - [DIVIDENDI.md](../../../references/DIVIDENDI.md): Guida al calcolo dei dividendi esteri (Netto Frontiera).
+
+## ⚠️ Regole di Esecuzione e Sandbox (Mandatorie)
+1. **Nessuno Script Ad-Hoc**: **Non devi mai scrivere script Python o di altro tipo ad-hoc** per eseguire i calcoli, esportare dati o aggirare limitazioni. Devi utilizzare esclusivamente gli script ufficiali presenti nel repository (`calcola_ivafe.py`, `calcola_dividendi.py`, `parse_html_summary.py`).
+2. **Politica Sandbox (Connessione Internet)**: Gli script richiedono l'accesso a Internet per scaricare i tassi di cambio (Banca d'Italia) e le quotazioni (Yahoo Finance). 
+   - Se l'ambiente in cui ti trovi (sandbox dell'agente) blocca queste connessioni o se l'utente non riesce ad approvare i comandi di rete, **non provare a creare script offline o a cablare dati manualmente**.
+   - **Devi avvisare immediatamente l'utente e fermare l'esecuzione**, spiegando che l'ambiente è limitato (sandboxed) e consigliando all'utente di eseguire gli script localmente sul proprio computer o tramite un agente non sandboxed.
 
 ## Flusso Operativo (Mandatorio)
 
@@ -42,10 +48,14 @@ I file si trovano nella radice del repository:
 
 3.  **Raccogli i parametri comuni**:
     *   Chiedi sempre l'**Anno Fiscale** di riferimento se non specificato.
+    *   Chiedi all'utente se intende presentare il **Modello 730** (Quadro W e Quadro M) o il **Modello Redditi PF** (Quadro RW e Quadro RM) per adattare la spiegazione dei risultati.
 
 ---
 
 #### Istruzioni di Download (da mostrare solo se i file mancano):
+
+> [!WARNING]
+> Non suggerire all'utente di fare "Salva con nome..." dal browser per l'Account Summary, perché salverebbe solo lo scheletro JavaScript senza i dati reali. Segui rigorosamente una delle due opzioni sotto.
 
 *   **Istruzioni `ss.csv` (Azioni):**
     1. Accedi a **Morgan Stanley atWork**.
@@ -53,15 +63,14 @@ I file si trovano nella radice del repository:
     3. Imposta: *Reporting Period* = `All available history`, *Currency* = `USD`, *Output Format* = `CSV`.
     4. Scarica e salva come `ss.csv` nella radice del progetto.
 
-*   **Istruzioni `activity-summary.csv` (Dividendi/Cash/Cutoff):**
-    1. Accedi a **Morgan Stanley atWork**.
-    2. Vai su **Activity** > **Reports** > **Account Summary**.
-    3. Imposta: *Period* = `All Available History`, spunta *Share & Cash Holdings* e *Equity Awards*, *View As* = `Web Page`, *Type* = `Full`.
-    4. Clicca su **Submit**. Scorri in fondo, cerca "IRS Nonresident Alien Withholding".
-    5. Copia la tabella **Activity** (dall'intestazione alla fine), incollala in Excel/Sheets ed esportala come `activity-summary.csv` nella radice del progetto.
+*   **Istruzioni `activity-summary.csv` (Dividendi/Cash/Cutoff) - Copia e Incolla:**
+    1. Accedi a **Morgan Stanley atWork** > **Activity** > **Reports** > **Account Summary**.
+    2. Imposta: *Period* = `All Available History`, spunta *Share & Cash Holdings* e *Equity Awards*, *View As* = `Web Page`, *Type* = `Full`.
+    3. Clicca su **Submit**.
+    4. Scorri in fondo alla pagina generata, seleziona l'intera tabella **Activity** (dall'intestazione alla fine), copiala e incollala in Excel/Sheets, quindi esportala come `activity-summary.csv` nella radice del progetto.
 
-*   **Metodo Alternativo via HTML (Consigliato, evita il copia/incolla):**
-    1. Esegui i passaggi da 1 a 3 delle istruzioni per `activity-summary.csv` (impostazione filtri).
+*   **Metodo Alternativo via HTML (Crea file tramite cURL):**
+    1. Esegui i passaggi da 1 a 3 delle istruzioni sopra (impostazione filtri).
     2. **Prima di cliccare su Submit**, apri i *Developer Tools* (F12) e vai sulla tab *Network*.
     3. Clicca su **Submit**.
     4. Nella tab *Network*, individua la richiesta a `userStatement.do` (avvenuta al click di Submit).
@@ -69,35 +78,34 @@ I file si trovano nella radice del repository:
     6. Esegui il comando nel terminale salvando l'output su file (es. aggiungendo `-o account-summary.html` alla fine).
     7. Converti l'HTML in CSV con il parser:
        ```bash
-       .venv/bin/python scripts/parse_html_summary.py --html account-summary.html --output account-summary.csv
+       uv run scripts/parse_html_summary.py --html account-summary.html --output account-summary.csv
        ```
 
-### 2. Funzionamento di Cutoffs e Sale Date (Spiegazione all'Utente)
-Spiega all'utente come lo script userà le date fornite:
-- **Cutoffs Multipli (Stock)**: Lo script li usa per chiudere automaticamente le finestre di possesso delle azioni maturate fino a quel momento.
-- **Cutoffs Cash**: Lo script resetta a zero il saldo accumulato da quella data in poi per il calcolo della giacenza media.
-
-### 3. Esecuzione Tecnica (Consigliata tramite `uv`)
-> [!NOTE]
-> Gli script utilizzano i metadati in linea per le dipendenze. Usa preferibilmente `uv run` per eseguire gli script senza dover configurare manualmente l'ambiente.
-
-Se l'ambiente supporta `uv`, esegui direttamente:
+### 2. Esecuzione Tecnica (Consigliata tramite `uv`)
+Se l'ambiente supporta `uv` ed ha accesso a Internet, esegui:
 
 **Esecuzione Calcolo Stock:**
 ```bash
-uv run scripts/calcola_ivafe.py --csv report_azioni.csv --anno 2024 --account-summary account-summary.csv
+uv run scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --account-summary account-summary.csv
 ```
 
 **Esecuzione Calcolo Dividendi e IVAFE Cash:**
 ```bash
-uv run scripts/calcola_dividendi.py --csv account-summary.csv --anno 2024 --cutoff 2024-10-01
+uv run scripts/calcola_dividendi.py --csv account-summary.csv --anno 2025
 ```
 
-*(In caso di fallback senza `uv`, crea un virtual environment, installa da `scripts/requirements.txt` ed esegui con `python`)*
-
 ## Risultati e Output
-Gli script generano tabelle testuali e file CSV (`quadro_rw_...csv` e `quadro_rm_...csv`).
 
-**Obbligo dell'Agente nel presentare i risultati:**
-- **Mostra esplicitamente le date di cutoff rilevate e rilevanti** per il calcolo (es. l'ultimo cutoff prima dell'anno fiscale e quelli avvenuti durante l'anno).
-- Verifica con l'utente se i risultati riflettono la sua situazione reale prima di considerare il compito concluso.
+Gli script generano tabelle testuali e file CSV. Quando presenti i risultati all'utente, adattali a seconda del modello di dichiarazione scelto:
+
+### A) Modello 730 (Precompilata)
+- **Quadro W (ex RW) - Investimenti**: Mostra i dati aggregati riga per riga da inserire nelle colonne 1, 3, 4, 5, 6, 7, 8, 10.
+  - *Nota*: **Non c'è la colonna per l'IVAFE calcolata** (Colonna 11 in RW). L'imposta viene calcolata automaticamente dal software 730. 
+  - *Nota sui Giorni (Colonna 10)*: Se l'arrotondamento del software genera discrepanze sul totale, consiglia all'utente di inserire i "Giorni Equivalenti/Pesati" calcolati dallo script per far coincidere il calcolo automatico con l'imposta reale pro-rata.
+- **Quadro M (ex RM) - Dividendi**: Mostra i dati per compilare il rigo **M31** (Tipo: `H`, Stato: `069`, Reddito: *Netto Frontiera*, Aliquota: `26`).
+
+### B) Modello Redditi PF
+- **Quadro RW - Investimenti**: Mostra i dati includendo anche la colonna 11 (IVAFE calcolata) e i totali dell'imposta da versare.
+- **Quadro RM - Dividendi**: Mostra i dati per la compilazione della Sezione V (Tipo: `I` o `H`, Stato: `069`, Reddito: *Netto Frontiera*, Aliquota: `26`, Imposta dovuta).
+
+Verifica sempre con l'utente se i risultati riflettono la sua situazione reale prima di considerare il compito concluso.

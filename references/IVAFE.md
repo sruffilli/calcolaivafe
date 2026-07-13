@@ -35,16 +35,41 @@ $$\text{IVAFE} = \text{Base Imponibile in Euro} \times \text{Aliquota (0,2\% o 0
 
 *Nota sul denominatore:* Gli esempi delle istruzioni ministeriali utilizzano il rapporto su base **365 giorni** anche per gli anni bisestili.
 
-## 6. Mappatura per la Compilazione del Quadro RW
-La compilazione pratica segue le istruzioni del [Fascicolo 2 dell'Agenzia delle Entrate (Istruzioni 2026)](https://www.agenziaentrate.gov.it/portale/documents/d/guest/pf2_istruzioni_2026):
+## 6. Mappatura per la Compilazione
+A seconda della dichiarazione utilizzata, i dati vanno riportati nel Quadro RW (Modello Redditi) o nel Quadro W (Modello 730).
 
-- **Colonna 7 (Valore Iniziale)**: Valore all'inizio del periodo d'imposta o al primo giorno di detenzione (costo o valore di mercato).
-- **Colonna 8 (Valore Finale)**: Valore al termine del periodo d'imposta o di detenzione.
+### A) Modello Redditi PF — Quadro RW
+La compilazione pratica segue le istruzioni del [Fascicolo 2 dell'Agenzia delle Entrate (Istruzioni 2026)](https://www.agenziaentrate.gov.it/portale/documents/d/guest/pf2_istruzioni_2026):
+- **Colonna 1 (Titolo possesso)**: Codice possesso (es. `1` per proprietà).
+- **Colonna 2 (Tipo contribuente)**: *Lasciare vuoto* se proprietario diretto (si compila come `1` per titolari effettivi AML, o `2` per soggetti con potere di firma/delega). 
+  > [!IMPORTANT]
+  > I codici della Colonna 2 sono invertiti rispetto al Modello 730 (Quadro W).
+- **Colonna 3 (Codice bene)**: Codice bene (es. `2` per titoli esteri).
+- **Colonna 4 (Stato estero)**: Codice Stato (es. `069` per USA).
+- **Colonna 5 (Quota possesso)**: Quota % (es. `100`).
+- **Colonna 6 (Criterio valore)**: Criterio valore (es. `1` per valore di mercato).
+- **Colonna 7 (Valore iniziale)**: Valore all'inizio del periodo d'imposta o al primo giorno di detenzione.
+- **Colonna 8 (Valore finale)**: Valore al termine del periodo d'imposta o di detenzione.
 - **Colonna 10 (Giorni)**: Numero di giorni di detenzione (rapportati a 365).
 - **Colonna 11 (IVAFE Calcolata)**: Risultato dell'applicazione dell'aliquota sul valore finale rapportato ai giorni e alla quota.
-- **Colonna 14 (Credito d'Imposta)**: Detrazione per eventuali imposte patrimoniali pagate all'estero sullo stesso asset (fino a concorrenza dell'imposta dovuta).
+
+### B) Modello 730 — Quadro W (Precompilata)
+Il Quadro W riproduce sostanzialmente il Quadro RW, ma con alcune importanti differenze nell'ordine e nella presenza delle colonne (non c'è il calcolo dell'imposta dovuta, effettuato dal software 730):
+- **Colonna 1 (Codice titolo possesso)**: `1` (Proprietà)
+- **Colonna 2 (Tipo contribuente)**: *Lasciare vuoto* se proprietario diretto (si compila come `1` per soggetti delegati al prelievo/movimentazione, o `2` per titolari effettivi).
+  > [!IMPORTANT]
+  > I codici della Colonna 2 sono invertiti rispetto al Modello Redditi (Quadro RW).
+- **Colonna 3 (Codice individuazione bene)**: `2` (Titoli esteri)
+- **Colonna 4 (Codice Stato estero)**: `069` (Stati Uniti)
+- **Colonna 5 (Quota di possesso)**: `100` (%)
+- **Colonna 6 (Criterio determinazione valore)**: `1` (Valore di mercato)
+- **Colonna 7 (Valore iniziale)**: Valore iniziale in Euro.
+- **Colonna 8 (Valore finale)**: Valore finale in Euro.
+- **Colonna 10 (Giorni IVAFE - Cripto-attività)**: Giorni di possesso.
+  - *Nota*: **Manca la colonna "IVAFE Calcolata"**. L'imposta viene liquidata nel foglio di sintesi `730-3`. 
+  - *Nota sui Giorni Equivalenti*: Poiché il software del 730 calcola l'imposta in modo rigido sul valore finale aggregato, per evitare che applichi 365 giorni su lotti detenuti solo in parte, occorre inserire i "Giorni Equivalenti" calcolati dallo script nel campo dei giorni per far quadrare l'arrotondamento con l'imposta reale pro-rata.
 
 ## 7. Nota sui Redditi di Capitale (Dividendi)
 L'IVAFE è un'imposta patrimoniale che si applica sul valore delle attività finanziarie detenute all'estero (lo *stock* di capitale). I proventi derivanti da tali attività, come i **dividendi**, costituiscono invece redditi di capitale e non sono soggetti a IVAFE in sé.
-- I dividendi vanno dichiarati nel **Quadro RM** e tassati con imposta sostitutiva del 26% (applicando il principio del "Netto Frontiera").
+- I dividendi vanno dichiarati nel **Quadro RM** (Modello Redditi) o nel **Quadro M** (Modello 730) e tassati con imposta sostitutiva del 26% (applicando il principio del "Netto Frontiera").
 - Tuttavia, se i dividendi percepiti vengono mantenuti sul conto corrente estero, essi concorrono a formare la giacenza del conto stesso. Se la giacenza media supera i 5.000 euro, il conto sarà soggetto all'IVAFE fissa di 34,20 euro (come descritto nella Deroga Bancaria).
