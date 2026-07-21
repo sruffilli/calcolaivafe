@@ -251,7 +251,9 @@ def main():
     giacenza_media = sum_eur / 365.0
 
     # Calculate Dividends for Quadro RM in target_year
-    sum_dividends_eur = 0.0
+    # Lordo (Dividend Cash), Ritenuta estera (IRS Withholding, importi negativi) e Netto
+    sum_dividends_gross_eur = 0.0
+    sum_withholding_eur = 0.0
     count_ops = 0
     
     for op in operations:
@@ -262,10 +264,14 @@ def main():
             except ValueError:
                 eur_amount = op["amount"]
             
-            sum_dividends_eur += eur_amount
-            
             if op["activity"] == "Dividend (Cash)":
+                sum_dividends_gross_eur += eur_amount
                 count_ops += 1
+            else:
+                # Ritenuta estera: nel CSV è un importo negativo
+                sum_withholding_eur += abs(eur_amount)
+
+    sum_dividends_net_eur = sum_dividends_gross_eur - sum_withholding_eur
 
     # Output Results
     print("\n" + "=" * 60)
@@ -279,7 +285,7 @@ def main():
     ivafe_cash = 0.0
     if giacenza_media > 5000:
         print("  -> SOGLIA 5.000€ SUPERATA!")
-        print("  -> Dovuta IVAFE fissa di 34,20€ (da rapportare ai giorni di apertura se applicabile).")
+        print("  -> Dovuta IVAFE fissa di 34,20€ annui (da rapportare ai giorni di detenzione e alla quota di possesso).")
         ivafe_cash = 34.20
     elif picco_massimo_eur > 15000:
         print("  -> SOGLIA 15.000€ SUPERATA! È obbligatorio dichiarare il conto nel Quadro RW ai fini del monitoraggio fiscale.")
@@ -287,23 +293,31 @@ def main():
     else:
         print("  -> Giacenza media < 5.000€ E picco < 15.000€.")
         print("  -> Secondo la normativa vigente (L. 186/2014), NON vi è obbligo di dichiarare il conto nel Quadro RW.")
+        print("  -> ATTENZIONE: l'esenzione dal monitoraggio riguarda letteralmente 'depositi e conti correnti bancari'.")
+        print("     Il cash presso un broker potrebbe non rientrarvi: in ottica prudenziale valutare comunque la dichiarazione.")
         
-    print(f"\n[Quadro RM - Redditi di Capitale]")
+    print(f"\n[Quadro RM - Redditi di Capitale - Rigo RM31/M31, codice H]")
     print(f"  Numero operazioni dividendo nel {target_year}: {count_ops}")
-    print(f"  Totale Dividendi Netti (Netto Frontiera): €{sum_dividends_eur:.2f}")
+    print(f"  Dividendi LORDI (lordo frontiera): €{sum_dividends_gross_eur:.2f}")
+    print(f"  Ritenuta estera subita (es. IRS 15%): €{sum_withholding_eur:.2f}")
+    print(f"  Dividendi NETTI (netto frontiera): €{sum_dividends_net_eur:.2f}")
     imposta_sostitutiva = 0.0
-    if sum_dividends_eur > 0:
-        imposta_sostitutiva = sum_dividends_eur * 0.26
-        print(f"  -> Imposta sostitutiva dovuta (26%): €{imposta_sostitutiva:.2f}")
+    if sum_dividends_gross_eur > 0:
+        imposta_sostitutiva = sum_dividends_gross_eur * 0.26
+        print(f"  -> Imposta sostitutiva dovuta (26% sul LORDO, come da istruzioni RM31/M31): €{imposta_sostitutiva:.2f}")
+        print(f"  -> Nota: la Cassazione (sent. 25698/2022 e 10204/2024) riconosce il credito/rimborso")
+        print(f"     della ritenuta estera (€{sum_withholding_eur:.2f}) tramite istanza di rimborso, NON la riduzione della base.")
+        print(f"     Dichiarare il netto frontiera (26% su €{sum_dividends_net_eur:.2f} = €{sum_dividends_net_eur * 0.26:.2f}) è una posizione")
+        print(f"     difforme dalle istruzioni ufficiali e contestabile in accertamento.")
     print("=" * 60 + "\n")
 
     # Generazione CSV
     rm_filename = f"quadro_rm_{target_year}.csv"
     with open(rm_filename, mode="w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["Anno", "Tipo Reddito", "Codice Stato Estero", "Totale Dividendi Netti (EUR)", "Imposta Sostitutiva 26% (EUR)"])
-        if sum_dividends_eur > 0:
-            writer.writerow([target_year, "L (Utili esteri)", "069", round(sum_dividends_eur, 2), round(imposta_sostitutiva, 2)])
+        writer.writerow(["Anno", "Tipo Reddito", "Codice Stato Estero", "Dividendi Lordi (EUR)", "Ritenuta Estera (EUR)", "Dividendi Netti (EUR)", "Imposta Sostitutiva 26% su Lordo (EUR)"])
+        if sum_dividends_gross_eur > 0:
+            writer.writerow([target_year, "H (Utili di fonte estera)", "069", round(sum_dividends_gross_eur, 2), round(sum_withholding_eur, 2), round(sum_dividends_net_eur, 2), round(imposta_sostitutiva, 2)])
     print(f"  Output CSV salvato in: {rm_filename}")
 
     rw_filename = f"quadro_rw_cash_{target_year}.csv"
