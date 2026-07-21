@@ -22,6 +22,7 @@ import pandas as pd
 # Cache in memoria per evitare chiamate API duplicate
 # ---------------------------------------------------------------------------
 _exchange_rate_cache = {}
+_daily_exchange_rate_cache = {}
 
 # ---------------------------------------------------------------------------
 # TASSO DI CAMBIO — Banca d'Italia REST API
@@ -59,6 +60,46 @@ def get_exchange_rate(target_date: date) -> float:
         )
     _exchange_rate_cache[cache_key] = rate
     return rate
+
+
+def _fetch_exchange_rate_daily(target_date: date) -> float | None:
+    url = "https://tassidicambio.bancaditalia.it/terzevalute-wf-web/rest/v1.0/dailyRates"
+    params = {
+        "referenceDate": target_date.isoformat(),
+        "baseCurrencyIsoCode": "USD",
+        "currencyIsoCode": "EUR",
+        "lang": "it",
+    }
+    headers = {"Accept": "application/json"}
+    try:
+        resp = requests.get(url, params=params, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        rates = data.get("rates", [])
+        if rates:
+            return float(rates[0]["avgRate"])
+    except Exception:
+        return None
+    return None
+
+
+def get_daily_exchange_rate(target_date: date) -> float:
+    cache_key = target_date.isoformat()
+    if cache_key in _daily_exchange_rate_cache:
+        return _daily_exchange_rate_cache[cache_key]
+
+    # Tenta la data target, poi va a ritroso (max 10 giorni) per weekend/festività
+    current = target_date
+    for attempt in range(10):
+        rate = _fetch_exchange_rate_daily(current)
+        if rate is not None:
+            _daily_exchange_rate_cache[cache_key] = rate
+            return rate
+        current -= timedelta(days=1)
+
+    raise ValueError(
+        f"Impossibile recuperare il tasso di cambio giornaliero per {target_date.isoformat()}"
+    )
 
 def parse_cash(cash_str):
     if not cash_str: return 0.0
@@ -216,7 +257,7 @@ def main():
     for op in operations:
         if op["date"].year == target_year and op["activity"] in ["Dividend (Cash)", "IRS Nonresident Alien Withholding"]:
             try:
-                rate = get_exchange_rate(op["date"])
+                rate = get_daily_exchange_rate(op["date"])
                 eur_amount = op["amount"] / rate
             except ValueError:
                 eur_amount = op["amount"]

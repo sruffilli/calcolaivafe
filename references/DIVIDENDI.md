@@ -26,6 +26,11 @@ I principi cardine stabiliti sono:
 - **Imposta Italiana (26% su € 850)**: € 221,00
 - Netto Finale per l'Investitore: € 629,00 (invece di € 590,00 calcolati sul lordo).
 
+### Tasso di Cambio per i Dividendi
+La conversione in Euro dei dividendi espressi in valuta estera (es. USD) deve avvenire applicando il **tasso di cambio giornaliero della Banca d'Italia** riferito alla data di effettivo incasso del dividendo (data di accredito sul conto titoli), ai sensi dell'**Art. 45, comma 1, del TUIR**. 
+
+Non si deve utilizzare il tasso medio mensile, che è invece riservato per le valorizzazioni patrimoniali del Quadro RW (IVAFE).
+
 ## 3. Mappatura per la Compilazione
 A seconda della dichiarazione utilizzata, i proventi vanno dichiarati nel Quadro RM (Modello Redditi) o nel Quadro M (Modello 730).
 
