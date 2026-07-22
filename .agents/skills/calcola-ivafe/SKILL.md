@@ -102,10 +102,10 @@ Gli script generano tabelle testuali e file CSV. Quando presenti i risultati all
 - **Quadro W (ex RW) - Investimenti**: Mostra i dati aggregati riga per riga da inserire nelle colonne 1, 3, 4, 5, 6, 7, 8, 10.
   - *Nota*: **Non c'è la colonna per l'IVAFE calcolata** (Colonna 11 in RW). L'imposta viene calcolata automaticamente dal software 730. 
   - *Nota sui Giorni (Colonna 10)*: Se l'arrotondamento del software genera discrepanze sul totale, consiglia all'utente di inserire i "Giorni Equivalenti/Pesati" calcolati dallo script per far coincidere il calcolo automatico con l'imposta reale pro-rata.
-- **Quadro M (ex RM) - Dividendi**: Mostra i dati per compilare il rigo **M31** (Tipo: `H`, Stato: `069`, Reddito: *Netto Frontiera*, Aliquota: `26`).
+- **Quadro M (ex RM) - Dividendi**: Mostra i dati per compilare il rigo **M31** (Tipo: `H`, Stato: `069`, Reddito: importo **al lordo** delle ritenute estere, Aliquota: `26`). Segnala all'utente che la ritenuta estera può essere recuperata tramite istanza di rimborso (Cassazione 25698/2022 e 10204/2024), non riducendo la base imponibile.
 
 ### B) Modello Redditi PF
 - **Quadro RW - Investimenti**: Mostra i dati includendo anche la colonna 11 (IVAFE calcolata) e i totali dell'imposta da versare.
-- **Quadro RM - Dividendi**: Mostra i dati per la compilazione della Sezione V (Tipo: `I` o `H`, Stato: `069`, Reddito: *Netto Frontiera*, Aliquota: `26`, Imposta dovuta).
+- **Quadro RM - Dividendi**: Mostra i dati per la compilazione del rigo **RM31** (Sezione II-A) (Tipo: `H`, Stato: `069`, Reddito: importo **al lordo** delle ritenute estere, Aliquota: `26`, Imposta dovuta). Segnala all'utente che la ritenuta estera può essere recuperata tramite istanza di rimborso (Cassazione 25698/2022 e 10204/2024), non riducendo la base imponibile.
 
 Verifica sempre con l'utente se i risultati riflettono la sua situazione reale prima di considerare il compito concluso.
