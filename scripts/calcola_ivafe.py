@@ -749,8 +749,8 @@ def main():
         print("=" * 80)
 
         # Export CSV
-        output_name = f"quadro_rw_{args.anno}_{args.ticker}.csv"
-        output_path = csv_path.parent / output_name
+        # Output nella directory corrente, come calcola_dividendi.py
+        output_path = Path.cwd() / f"quadro_rw_{args.anno}_{args.ticker}.csv"
         result.to_csv(output_path, index=False)
         logger.info("Risultati esportati in: %s", output_path)
         print(f"\n  Output CSV salvato in: {output_path}\n")

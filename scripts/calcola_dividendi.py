@@ -246,7 +246,11 @@ def main():
         if eur_bal > picco_massimo_eur:
             picco_massimo_eur = eur_bal
 
-    giacenza_media = sum_eur / 365.0
+    # Giacenza media annua: somma delle giacenze giornaliere / 365, sempre,
+    # "indipendentemente dal numero di giorni in cui il conto risulta attivo"
+    # (Agenzia delle Entrate, archivio rapporti finanziari, provv. 28/05/2015).
+    # Vale anche negli anni bisestili. Giacenza negativa -> zero.
+    giacenza_media = max(sum_eur / 365.0, 0.0)
 
     # Calculate Dividends for Quadro RM in target_year
     # Lordo (Dividend Cash), Ritenuta estera (IRS Withholding, importi negativi) e Netto
@@ -307,7 +311,8 @@ def main():
     print("=" * 60 + "\n")
 
     # Generazione CSV
-    rm_filename = f"quadro_rm_{target_year}.csv"
+    # Output nella directory corrente, come calcola_ivafe.py
+    rm_filename = os.path.join(os.getcwd(), f"quadro_rm_{target_year}.csv")
     with open(rm_filename, mode="w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["Anno", "Tipo Reddito", "Codice Stato Estero", "Dividendi Lordi (EUR)", "Ritenuta Estera (EUR)", "Dividendi Netti (EUR)", "Imposta Sostitutiva 26% su Lordo (EUR)"])
@@ -315,7 +320,7 @@ def main():
             writer.writerow([target_year, "H (Utili di fonte estera)", "069", round(sum_dividends_gross_eur, 2), round(sum_withholding_eur, 2), round(sum_dividends_net_eur, 2), round(imposta_sostitutiva, 2)])
     print(f"  Output CSV salvato in: {rm_filename}")
 
-    rw_filename = f"quadro_rw_cash_{target_year}.csv"
+    rw_filename = os.path.join(os.getcwd(), f"quadro_rw_cash_{target_year}.csv")
     with open(rw_filename, mode="w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["Anno", "Codice individuazione bene", "Codice Stato Estero", "Giacenza Media (EUR)", "Picco (EUR)", "IVAFE Dovuta", "Obbligo RW"])

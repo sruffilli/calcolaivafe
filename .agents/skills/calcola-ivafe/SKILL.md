@@ -13,7 +13,9 @@ I file si trovano nella radice del repository:
 - `scripts/calcola_ivafe.py`: Lo script per il calcolo dell'IVAFE su azioni (GSUs).
 - `scripts/calcola_dividendi.py`: Lo script per il calcolo delle tasse sui dividendi (Quadro RM/M) e IVAFE su cash (Quadro RW/W).
 - `scripts/parse_html_summary.py`: Utility per convertire l'HTML dell'Account Summary in CSV.
-- `scripts/requirements.txt`: Dipendenze (pandas, yfinance, requests, tabulate).
+- `tests/run.sh`: test automatici sui file sample, senza rete.
+
+Le dipendenze (pandas, yfinance, requests, tabulate) sono dichiarate in testa a ogni script (PEP 723): `uv run` le risolve da solo. Gli script scrivono i CSV di output nella directory corrente.
 
 ## Documentazione di Riferimento
 - [IVAFE.md](../../../references/IVAFE.md): Report sull'architettura normativa dell'IVAFE.

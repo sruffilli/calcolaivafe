@@ -79,10 +79,11 @@ uv run scripts/calcola_dividendi.py --csv activity-summary.csv --anno 2025
 
 ### 🐍 Esecuzione classica con Python (Alternativa)
 Se non utilizzi `uv`, puoi procedere nel modo classico:
+Le dipendenze sono dichiarate in testa a ogni script (metadati PEP 723): `pandas`, `requests`, `yfinance`, `tabulate`.
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install --index-url https://pypi.org/simple -r scripts/requirements.txt
+pip install pandas requests yfinance tabulate
 python scripts/calcola_ivafe.py --csv ss.csv --anno 2025 --account-summary activity-summary.csv
 python scripts/calcola_dividendi.py --csv activity-summary.csv --anno 2025
 ```
@@ -114,6 +115,15 @@ Puoi usare questi script con qualsiasi altro LLM (es. caricando i file in un "Pr
 I dettagli sul calcolo e le circolari dell'Agenzia delle Entrate sono documentati in:
 - [IVAFE.md](references/IVAFE.md)
 - [DIVIDENDI.md](references/DIVIDENDI.md)
+
+## Output
+Entrambi gli script scrivono i CSV di risultato nella **directory corrente** (`quadro_rw_<anno>_<ticker>.csv`, `quadro_rm_<anno>.csv`, `quadro_rw_cash_<anno>.csv`).
+
+## Test
+```bash
+tests/run.sh
+```
+Esegue gli script sui file `*.csv.sample` con cambi e quotazioni finti (nessuna rete) e confronta i numeri con i valori attesi. Richiede `uv`.
 
 ## Disclaimer
 Questo strumento è un ausilio al calcolo e non sostituisce il parere di un consulente fiscale.
