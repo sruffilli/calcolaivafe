@@ -182,9 +182,20 @@ def get_exchange_rate(target_date: date) -> float:
 # ESTRAZIONE CUTOFF DA ACCOUNT SUMMARY
 # ===================================================================
 
-def extract_cutoffs_from_summary(summary_path: str) -> list[date]:
+# Residuo massimo di azioni (in valore assoluto) oltre il quale un trasferimento
+# viene segnalato come parziale. Copre gli arrotondamenti delle frazioni.
+CUTOFF_RESIDUAL_TOLERANCE = 0.5
+
+
+def extract_cutoffs_from_summary(summary_path: str) -> tuple[list[date], dict[date, float]]:
     """
     Legge l'account summary e estrae le date dei 'Transfer out' o 'Sell' di azioni.
+
+    Restituisce (cutoff_dates, residuo_per_data): il residuo e' il saldo azioni
+    ricostruito dal summary subito dopo l'ultimo movimento di quel giorno.
+    Lo script tratta ogni cutoff come liquidazione TOTALE dei lotti maturati fino
+    a quella data: se il residuo non e' ~0 il trasferimento era parziale e il
+    calcolo va rivisto a mano (CSV separati, vedi docstring del modulo).
     """
     try:
         df = pd.read_csv(summary_path, sep=None, engine='python', dtype=str)
@@ -222,21 +233,36 @@ def extract_cutoffs_from_summary(summary_path: str) -> list[date]:
 
     if not (col_date and col_activity and col_shares):
         logger.warning("Colonne necessarie non trovate in %s. Impossibile estrarre cutoff automaticamente.", summary_path)
-        return []
+        return [], {}
+
+    df = df.copy()
+    df['parsed_date'] = pd.to_datetime(
+        df[col_date].str.strip(), format="%d-%b-%Y", errors='coerce'
+    ).dt.date
+    df['activity_norm'] = df[col_activity].fillna('').str.strip().str.lower()
+    df['shares_num'] = pd.to_numeric(
+        df[col_shares].fillna('').str.replace(',', '', regex=False).str.strip(),
+        errors='coerce',
+    )
+    # Righe di saldo (Opening/Closing Value) non sono movimenti
+    df = df[df['parsed_date'].notna() & ~df['activity_norm'].isin(['opening value', 'closing value', 'opening balance'])]
 
     # Filtra per trasferimenti o vendite di azioni
     valid_activities = ['transfer out', 'sell', 'sale']
-    df_transfers = df[df[col_activity].str.strip().str.lower().isin(valid_activities)].copy()
-    
-    # Converte le date
-    df_transfers['parsed_date'] = pd.to_datetime(
-        df_transfers[col_date].str.strip(), format="%d-%b-%Y", errors='coerce'
-    ).dt.date
-    
-    df_transfers = df_transfers.dropna(subset=['parsed_date'])
-    
-    cutoff_dates = sorted(list(df_transfers['parsed_date'].unique()))
-    return cutoff_dates
+    cutoff_dates = sorted(df.loc[df['activity_norm'].isin(valid_activities), 'parsed_date'].unique())
+
+    # Saldo azioni ricostruito (release + split - trasferimenti), in ordine di data
+    moves = df.dropna(subset=['shares_num']).sort_values('parsed_date', kind='stable')
+    balance_by_date = moves.groupby('parsed_date')['shares_num'].sum().cumsum()
+    residuals = {d: float(balance_by_date.get(d, 0.0)) for d in cutoff_dates}
+    for d, residual in residuals.items():
+        if abs(residual) > CUTOFF_RESIDUAL_TOLERANCE:
+            logger.warning(
+                "Cutoff %s: dopo il trasferimento restano %.3f azioni nel conto. "
+                "Lo script lo tratta come liquidazione TOTALE: verificare a mano.",
+                d.isoformat(), residual,
+            )
+    return list(cutoff_dates), residuals
 
 
 # ===================================================================
@@ -662,11 +688,13 @@ def main():
         # Gestione Cutoffs (Manuali + Automatici)
         cutoffs = args.cutoff or []
         if args.account_summary:
-            detected_cutoffs = extract_cutoffs_from_summary(args.account_summary)
+            detected_cutoffs, residuals = extract_cutoffs_from_summary(args.account_summary)
             if detected_cutoffs:
-                print(f"\n[i] Rilevati cutoff in {args.account_summary}:")
+                print(f"\n[i] Rilevati cutoff in {args.account_summary} (saldo azioni residuo dopo il trasferimento):")
                 for d in detected_cutoffs:
-                    print(f"    - {d.isoformat()}")
+                    residual = residuals.get(d, 0.0)
+                    flag = "" if abs(residual) <= CUTOFF_RESIDUAL_TOLERANCE else "  <-- PARZIALE: lo script assume liquidazione totale, verificare"
+                    print(f"    - {d.isoformat()}  residuo {residual:+.3f}{flag}")
                 cutoffs = sorted(list(set(cutoffs + detected_cutoffs)))
             else:
                 print(f"\n[i] Nessun cutoff rilevato in {args.account_summary}")

@@ -91,15 +91,14 @@ python scripts/calcola_dividendi.py --csv activity-summary.csv --anno 2025
 
 ## 🤖 Utilizzo con Agenti AI
 
-### Con Antigravity (o `antigravity-cli`)
-Questo repository è configurato come una **Skill locale** per Antigravity. 
-Se usi `antigravity-cli` in questa cartella, l'agente rileverà automaticamente la skill.
+### Con un agente che legge `.agents/skills/` (pi, Antigravity, Gemini CLI, ...)
+Questo repository contiene una **skill locale** in `.agents/skills/calcola-ivafe/SKILL.md`. Qualsiasi agente che scansiona `.agents/skills/` nella cartella di lavoro (pi, `antigravity-cli`, Gemini CLI) la rileva automaticamente: basta lanciarlo dalla radice del repository.
 
-**Esempi di comandi:**
-- `@antigravity calcola le tasse per l'anno 2025`
-- `@antigravity esegui calcola-ivafe per il 2025 con cutoff 2025-11-20`
+**Esempi di prompt:**
+- `calcola le tasse per l'anno 2025`
+- `esegui calcola-ivafe per il 2025 con cutoff 2025-11-20`
 
-L'agente leggerà le istruzioni in `.agents/skills/calcola-ivafe/SKILL.md`, ti guiderà nell'intervista iniziale e lancerà gli script per te.
+L'agente segue la skill: ti guida nell'intervista iniziale (anno fiscale, file disponibili, 730 vs Redditi PF), lancia gli script e ti presenta le righe da compilare. Se un cutoff rilevato automaticamente risulta **parziale** (restano azioni nel conto dopo il trasferimento), lo script lo segnala: in quel caso il calcolo va rivisto a mano, vedi la nota in testa a `scripts/calcola_ivafe.py`.
 
 ### Con altri Agenti (ChatGPT, Claude, ecc.)
 Puoi usare questi script con qualsiasi altro LLM (es. caricando i file in un "Project" di Claude o in una chat di ChatGPT Plus):

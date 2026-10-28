@@ -235,12 +235,10 @@ def main():
         d_date = d.date()
         usd_bal = daily_balances.get(d_date, 0.0)
         
-        if usd_bal != 0.0:
-            try:
-                rate = get_exchange_rate(d_date)
-                eur_bal = usd_bal / rate
-            except ValueError:
-                eur_bal = usd_bal
+        if abs(usd_bal) >= 0.005:  # tolleranza: somme float di +div -ritenuta -transfer non danno 0.0 esatto
+            # Nessun fallback silenzioso: un saldo USD spacciato per EUR
+            # produrrebbe una giacenza media sbagliata senza alcun avviso.
+            eur_bal = usd_bal / get_exchange_rate(d_date)
         else:
             eur_bal = 0.0
             
@@ -258,12 +256,9 @@ def main():
     
     for op in operations:
         if op["date"].year == target_year and op["activity"] in ["Dividend (Cash)", "IRS Nonresident Alien Withholding"]:
-            try:
-                rate = get_daily_exchange_rate(op["date"])
-                eur_amount = op["amount"] / rate
-            except ValueError:
-                eur_amount = op["amount"]
-            
+            # Idem: se il cambio giornaliero non c'è, l'errore deve emergere.
+            eur_amount = op["amount"] / get_daily_exchange_rate(op["date"])
+
             if op["activity"] == "Dividend (Cash)":
                 sum_dividends_gross_eur += eur_amount
                 count_ops += 1
@@ -329,4 +324,9 @@ def main():
     print(f"  Output CSV salvato in: {rw_filename}\n")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except ValueError as e:
+        print(f"\nErrore fatale: {e}", file=sys.stderr)
+        print("Nessun risultato prodotto: verifica la connessione all'API Banca d'Italia e riprova.", file=sys.stderr)
+        sys.exit(1)

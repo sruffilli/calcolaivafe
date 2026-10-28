@@ -21,7 +21,7 @@ I file si trovano nella radice del repository:
 
 ## ⚠️ Regole di Esecuzione e Sandbox (Mandatorie)
 1. **Nessuno Script Ad-Hoc**: **Non devi mai scrivere script Python o di altro tipo ad-hoc** per eseguire i calcoli, esportare dati o aggirare limitazioni. Devi utilizzare esclusivamente gli script ufficiali presenti nel repository (`calcola_ivafe.py`, `calcola_dividendi.py`, `parse_html_summary.py`).
-2. **Politica Sandbox (Connessione Internet)**: Gli script richiedono l'accesso a Internet per scaricare i tassi di cambio (Banca d'Italia) e le quotazioni (Yahoo Finance). 
+2. **Politica Sandbox (Connessione Internet)**: Gli script richiedono l'accesso a Internet per scaricare i tassi di cambio (Banca d'Italia) e le quotazioni (Yahoo Finance). Se un tasso non è recuperabile gli script **terminano con errore** (exit 1) invece di produrre numeri parziali: non interpretare un'uscita con errore come "risultato zero".
    - Se l'ambiente in cui ti trovi (sandbox dell'agente) blocca queste connessioni o se l'utente non riesce ad approvare i comandi di rete, **non provare a creare script offline o a cablare dati manualmente**.
    - **Devi avvisare immediatamente l'utente e fermare l'esecuzione**, spiegando che l'ambiente è limitato (sandboxed) e consigliando all'utente di eseguire gli script localmente sul proprio computer o tramite un agente non sandboxed.
 
@@ -40,6 +40,7 @@ I file si trovano nella radice del repository:
 2.  **Verifica la presenza di `activity-summary.csv` (o `account-summary.csv`)**:
     *   Se **è presente**:
         *   **Non chiedere** date di cutoff (né per le azioni né per il cash). Procedi direttamente rilevandole automaticamente dal file.
+        *   Lo script stampa, per ogni cutoff rilevato, il **saldo azioni residuo** dopo il trasferimento. Se una riga è marcata `PARZIALE`, il trasferimento non ha svuotato il conto: **fermati e chiedi all'utente** quali lotti sono stati trasferiti, perché lo script tratta ogni cutoff come liquidazione totale dei lotti maturati fino a quella data. Non rilanciare con cutoff diversi per "far sparire" l'avviso.
     *   Se **manca**:
         *   Spiega all'utente che può caricare `activity-summary.csv` per rilevare i cutoff in automatico (mostra *Istruzioni activity-summary.csv*).
         *   Se l'utente preferisce non caricarlo, **devi chiedere manualmente**:
